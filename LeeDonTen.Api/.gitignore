@@ -1,0 +1,21 @@
+bin/
+obj/
+
+.vs/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+publish/
+TestResults/
+
+# User Secrets
+secrets.json
+
+# Logs
+logs/
+*.log
+
+appsettings.Development.json
