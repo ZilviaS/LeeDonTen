@@ -38,20 +38,17 @@ function MusicianUi(){
     },[])
 
     useEffect(()=>{
+        if (!user.UserId) return
+        console.log(signalR.VERSION)
         const token = localStorage.getItem('token')
-        console.log("Token : ", token)
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(`${API}/donationHub`, {
                 accessTokenFactory: ()=> {
-                    console.log("sending token");
+                    console.log("sending token", token);
                     return token}
             })
             .withAutomaticReconnect()
             .build();
-        
-        connection.onreconnected(()=>{
-            setConnectionStatus("reconnecting")
-        })
 
         connection.onreconnected(()=>{
             setConnectionStatus("connected");
@@ -65,21 +62,21 @@ function MusicianUi(){
             try{
                 await connection.start()
                 console.log("SignalR Connected")
+                setConnectionStatus("connected")
 
-                // await connection.invoke("OnConnectedAsync", user.UserId)
+                await connection.invoke("JoinGroup", user.UserId)
 
             } catch(err){
                 console.log(err)
+                setConnectionStatus("disconnected")
             }
         }
-
         start()
 
         connection.on("NewDonation", (data)=>{
             console.log("New donation!", data);
             setDonations(prev => [data, ...prev]);
         })
-
         return ()=>{
             connection.stop();
         }

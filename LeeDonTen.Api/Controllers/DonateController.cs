@@ -60,7 +60,9 @@ public class DonateController : ControllerBase
         context.Requests.Add(request);
         context.SaveChanges();
 
-        await hubContext.Clients.Group(user.Id)
+        Console.WriteLine($"SEND TO GROUP : {request.UserId}");
+
+        await hubContext.Clients.Group(request.UserId)
             .SendAsync("NewDonation", new
             {
                 id = request.Id,
@@ -69,7 +71,7 @@ public class DonateController : ControllerBase
                 amount = dto.Amount,
                 message = dto.Message
             });
-
+        
         return Ok(new
         {
             Message = "donate finished"

@@ -2,10 +2,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 
 namespace LeeDonTen.Api.Hubs;
 
-[Authorize]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class DonationHub : Hub
 {
     public override async Task OnConnectedAsync()
@@ -22,6 +24,7 @@ public class DonationHub : Hub
     }
     public async Task JoinGroup(string userId)
     {
+        Console.WriteLine($"Join Group : {userId}");
         await Groups.AddToGroupAsync(
             Context.ConnectionId,
             userId
