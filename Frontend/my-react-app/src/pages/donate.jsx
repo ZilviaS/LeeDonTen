@@ -23,7 +23,7 @@ function Donate(){
 
     const handleDonate = async()=>{
         if(request.UserId == null){
-            console.log('error')
+            setErrorLog("something went wrong")
         }else{
             const res = await fetch(`${API}/api/donate`,{
                 method : 'POST',

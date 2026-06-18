@@ -53,8 +53,9 @@ function Musician(){
                                 <p className="w-full text-center KoHo text-3xl font-semibold">หน้าต่างใช้งาน</p>
                                 <div className="flex justify-center w-full mt-5">
                                     <div className="grid gap-3">
-                                        <a href="/musician/donation" className="text-center bg-green-500 hover:bg-green-700 hover:cursor-pointer rounded px-3 py-2 text-white">สร้าง Link Donate</a>
+                                        <a href="/musician/donation" className="text-center bg-green-500 hover:bg-green-700 hover:cursor-pointer rounded px-3 py-2 text-white">เปิดการ donate</a>
                                         <a href={`/user/${user.Username}`} className="text-center bg-red-500 hover:bg-red-700 hover:cursor-pointer px-3 py-2 text-white rounded">ใส่ข้อมูลผู้ใช้</a>
+                                        <a href={`/user/${user.Username}/history`} className="text-center bg-yellow-500 hover:bg-yellow-700 hover:cursor-pointer rounded px-3 py-2 text-white">ประวัติการ Donate</a>
                                         <a href="/" className="text-center bg-blue-500 hover:bg-blue-700 hover:cursor-pointer px-3 py-2 text-white rounded" >วิธีการใช้งาน LeeDonTen</a>
                                     </div>
                                 </div>

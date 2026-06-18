@@ -11,7 +11,9 @@ public class Request
     [Required]
     public string DonorName {get;set;} = string.Empty;
     [Required]
+    [MaxLength(20)]
     public string SongName {get; set;} = string.Empty;
+    [MaxLength(30)]
     public string Message {get; set;} = string.Empty;
     [Required]
     public decimal Amount {get; set;}

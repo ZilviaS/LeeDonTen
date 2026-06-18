@@ -55,6 +55,16 @@ function Login(){
                                 <input onChange={(e)=>{setUserForm({...userForm, Password : e.target.value})}} type="Password" className='px-1 w-full bg-gray-100 rounded border-1 border-gray-300'/>
                             </div>
                             <button onClick={handleLogin} className='roboto-mono w-80 bg-pink-500 text-center hover:bg-pink-700 px-2 py-1 rounded text-white hover:cursor-pointer'>เข้าสู่ระบบ</button>
+                            <div className="flex items-center w-80">
+                            <div className="flex-1 h-px bg-gray-300"></div>
+
+                                <span className="px-3 text-xs text-gray-500">
+                                    หรือ
+                                </span>
+
+                                <div className="flex-1 h-px bg-gray-300"></div>
+                            </div>
+                            <a href="/register" className='roboto-mono w-80 bg-blue-500 text-center hover:bg-blue-700 px-2 py-1 rounded text-white hover:cursor-pointer'>สมัครสมาชิก</a>
                         </div>
                         <div className='w-full flex justify-center gap-3 mb-3'>
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/policy">นโยบายข้อมูลส่วนบุคคล</a>

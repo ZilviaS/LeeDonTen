@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import '../App'
 import AeroheadLogo from '../assets/arrowhead.svg'
 
@@ -24,16 +25,18 @@ function Home(){
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/policy">นโยบายข้อมูลส่วนบุคคล</a>
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/terms">ข้อตกลงการใช้งาน</a>
                         </div>
-                        <div className='bg-white rounded w-[90%] h-10 shadow px-2 flex justify-between items-center hover:cursor-pointer'>
-                            <p className='KoHo font-semibold '>อะไรคือ LeeDonTen</p>
-                            <img className='w-4' src={AeroheadLogo} alt="" />
-                        </div>
-
-                        <div className='bg-white rounded w-[90%] h-10 shadow px-2 flex justify-between items-center mt-5 hover:cursor-pointer'>
-                            <p className='KoHo font-semibold '>ติดต่อ LeeDonTen</p>
-                            <img className='w-4' src={AeroheadLogo} alt="" />
+                        <div className='bg-white w-[90%] shadow rounded mt-3'>
+                            <div className='bg-gray-200 w-full h-10 px-2 flex justify-between items-center hover:cursor-pointer'>
+                                <p className='KoHo font-semibold '>อะไรคือ LeeDonTen</p>
+                            </div>
+                            <p className='px-2 text-md  my-1'>
+                                LeeDonTen เป็นผู้ให้บริการที่เชื่อมระหว่างนักดนตรีและผู้ชม เพื่อให้ผู้ชมสามารถบริจาคเงินให้กับนักดนตรี พร้อมกับส่งข้อความและขอเพลงไปด้วยได้ รวมไปถึงนักดนตรีก็สามารถรับรายได้จากการบริจาคจากผู้ชมได้อีกด้วย 
+                                <br />
+                                โดยในฝั่งนักดนตรีจะมีหน้ารายงานสดสำหรับดูยอดการโดเนตและข้อความจากคนดูได้ระหว่างแสดงสด และเมื่อจบโชว์ก็สามารถดูสถิติรวมได้ที่ Dashboard ของระบบ
+                            </p>
                         </div>
                     </div>
+                    <footer className='bg-gray-100 p-1 text-sm text-gray-800'>สามารถติดต่อได้ที่ E-MAIL: prepatjarundechakorn@gmail.com</footer>
                 </section>
             </section>
         </>

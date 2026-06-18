@@ -8,6 +8,11 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.AspNetCore.SignalR;
 using LeeDonTen.Api.Hubs;
 using System.Runtime.CompilerServices;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace LeeDonTen.Api.Controllers;
 
@@ -37,6 +42,14 @@ public class DonateController : ControllerBase
             return NotFound(new
             {
                 message = "error, user not found"
+            });
+        }
+
+        if (user.IsOpenDonations == false)
+        {
+            return Conflict(new
+            {
+                message = "Sorry, User is not open donation right now"
             });
         }
 
@@ -77,6 +90,80 @@ public class DonateController : ControllerBase
             Message = "donate finished"
         });
     }
-    
+
+    [HttpPut("update/{requestId}/cancel")]
+    public IActionResult CancelRequest(int requestId)
+    {
+        var request = context.Requests.FirstOrDefault(r => r.Id == requestId);
+        if (request == null)
+        {
+            return BadRequest(new
+            {
+                message = "request not found"
+            });
+        }
+        if (request.Status == Status.Cancelled)
+        {
+            return Ok(new
+            {
+                message = "request already cancelled"
+            });
+        }
+        request.Status = Status.Cancelled;
+
+        context.SaveChanges();
+
+        return Ok(new
+        {
+            messsage = "request cancelled"
+        });
+    }
+
+    [HttpPut("update/{requestId}/play")]
+    public IActionResult PlayRequest(int requestId)
+    {
+        var request = context.Requests.FirstOrDefault(r => r.Id == requestId);
+        if (request == null)
+        {
+            return BadRequest(new
+            {
+                message = "request not found"
+            });
+        }
+        if (request.Status == Status.Completed)
+        {
+            return Ok(new
+            {
+                message = "request already played"
+            });
+        }
+        request.Status = Status.Completed;
+
+        context.SaveChanges();
+
+        return Ok(new
+        {
+            messsage = "request played"
+        });
+    } 
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet("info")]
+    public IActionResult GetDonateInfo()
+    {
+        Console.WriteLine("You are here");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var data = context.Requests
+            .Where(data=> data.UserId == userId)
+            .ToList();
+
+        return Ok(data);
+    }
     
 }

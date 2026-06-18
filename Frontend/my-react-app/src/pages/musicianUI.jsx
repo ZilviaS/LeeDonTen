@@ -13,10 +13,49 @@ function MusicianUi(){
 
     const [ donation, setDonations ] = useState([]);
 
+    const [queue, setQueue] = useState([])
+
+    const [ nowPlay , setNowPlay ] = useState([]);
+
     const [ user , setUser ] = useState({
         Username : "",
         UserId : ""
     })
+
+    const handleAddQueue = (item)=>{
+        setQueue(prev => [...prev, item])
+
+        setDonations(prev => prev.filter(d=> d.id !== item.id))
+    }
+
+    const handlePlayRequest = async (item)=>{
+        const res = await fetch(`${API}/api/donate/update/${item.id}/play`,{
+            method : 'PUT'
+        })
+        const data = await res.json()
+        if(!res.ok){
+            console.log(data.message)
+        }else{
+            console.log("request has been played")
+            setDonations(prev => prev.filter(d => d.id !== item.id))
+            setQueue(prev => prev.filter(d => d.id !== item.id))
+            setNowPlay(item)
+        }
+    }
+
+    const handleCancelRequest = async (item)=>{
+        const res = await fetch(`${API}/api/donate/update/${item.id}/cancel`,{
+            method : 'PUT'
+        })
+        const data = await res.json()
+        if(!res.ok){
+            console.log(data.message)
+        }else{
+            console.log("request has been cancel")
+            setDonations(prev => prev.filter(d => d.id !== item.id))
+            setQueue(prev => prev.filter(d => d.id !== item.id))
+        }
+    }
 
     useEffect(()=>{
         const token = localStorage.getItem('token')
@@ -92,7 +131,7 @@ function MusicianUi(){
                         </div>
                     </div>
                     <div className='h-[80%] bg-white flex-col flex items-center'>
-                        <div className='flex justify-center py-5'>
+                        <div className='flex justify-center py-3'>
                             <p className='KoHo font-semibold text-xl'>หน้าต่าง Donate (นักดนตรี)</p>
                         </div>
                         <div className="w-full flex justify-end px-10">
@@ -103,10 +142,10 @@ function MusicianUi(){
                                 connectionStatus == 'disconnected' ? 'text-red-500' :
                                 'text-green-500' }`}>{connectionStatus}</p>
                         </div>
-                        <div className="w-full flex justify-center gap-2">
-                            <div className="w-[45%] bg-white border-gray-100 border-1 h-100">
-                                {donation.map((item, index)=>(
-                                    <div key={index} className="w-full border-gray-300 border-1 px-3">
+                        <div className="w-full flex justify-between px-10 h-100">
+                            <div className="w-[48%] bg-white border-gray-300 border-1 h-full overflow-y-scroll">
+                                {donation.map((item)=>(
+                                    <div key={item.Id} className="w-full border-gray-300 border-1 px-3">
                                         <div className="flex gap-2 items-baseline">
                                             <p className="KoHo">{item.donor}</p>
                                             <p className="text-pink-500 KoHo font-semibold">donate</p>
@@ -117,21 +156,49 @@ function MusicianUi(){
                                             <p className="KoHo">{item.song}</p>
                                         </div>
                                         <div>
-                                            <p className="text-gray-500 text-sm">{item.message}</p>
+                                            <p className="text-gray-500 text-sm text-wrap">{item.message}</p>
                                         </div>
                                         <div className="flex gap-2 mt-1 mb-2">
-                                            <button className="px-2 bg-green-500 rounded text-sm text-white">เข้าคิว</button>
-                                            <button className="px-2 bg-red-500 rounded text-sm text-white">ยกเลิก</button>
+                                            <button onClick={()=>handleAddQueue(item)} className="px-2 bg-green-500 rounded text-sm text-white">เข้าคิว</button>
+                                            <button onClick={()=>handleCancelRequest(item)} className="px-2 bg-red-500 rounded text-sm text-white">ยกเลิก</button>
                                         </div>
                                     </div>
 
                                 ))}
                             </div>
-                            <div className="w-[45%] bg-white border-gray-200 border-1 h-100">
-
+                            <div className="w-[48%] h-full">
+                                <div className="bg-white border-gray-300 border-1 h-[85%] overflow-y-scroll">
+                                    {queue.map((item)=>(
+                                        <div key={item.Id} className="w-full border-gray-300 border-1 px-3">
+                                            <div className="flex gap-2 items-baseline">
+                                                <p className="KoHo">{item.donor}</p>
+                                                <p className="text-pink-500 KoHo font-semibold">donate</p>
+                                                <p className="KoHo text-sm">{item.amount} บาท</p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <p className="text-pink-500 KoHo font-semibold">ขอเพลง</p>
+                                                <p className="KoHo">{item.song}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500 text-sm">{item.message}</p>
+                                            </div>
+                                            <div className="flex gap-2 mt-1 mb-2">
+                                                <button onClick={()=>handlePlayRequest(item)} className="px-2 bg-green-500 rounded text-sm text-white">เล่น</button>
+                                                <button onClick={()=>handleCancelRequest(item)} className="px-2 bg-red-500 rounded text-sm text-white">ยกเลิก</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="">
+                                    {nowPlay.amount? <>
+                                        <p className="text-sm KoHo">now playing : <span className="KoHO text-xl text-pink-500 font-bold">{nowPlay.song}</span></p>
+                                        <p className="text-xs KoHo">โดย <span className=" KoHo text-sm text-blue-600 font-bold">{nowPlay.donor}</span> ได้โดเนท <span className="KoHo text-sm text-green-600 font-bold">{nowPlay.amount}</span> บาท</p>
+                                    </>: <>
+                                    </>}
+                                </div>
                             </div>
                         </div>
-                        <div className='w-full flex justify-center gap-3 mb-3'>
+                        <div className='w-full flex justify-center gap-3 mb-3 mt-3'>
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/policy">นโยบายข้อมูลส่วนบุคคล</a>
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/terms">ข้อตกลงการใช้งาน</a>
                         </div>

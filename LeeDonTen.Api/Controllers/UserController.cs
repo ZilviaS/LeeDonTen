@@ -113,7 +113,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("check/{username}")]
-    public IActionResult CheckUser(string username)
+    public IActionResult CheckUserDonation(string username)
     {
         var user = context.Users.FirstOrDefault(u => u.UserName == username);
 
@@ -122,6 +122,14 @@ public class UserController : ControllerBase
             return NotFound(new
             {
                 message = "User not found!"
+            });
+        }
+
+        if(user.IsOpenDonations == false)
+        {
+            return Conflict(new
+            {
+                message = "Sorry, User is not open donation right now"
             });
         }
 

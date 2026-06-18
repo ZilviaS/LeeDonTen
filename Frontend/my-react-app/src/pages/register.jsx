@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import '../App'
+import eyeIcon from '../assets/eye.svg'
+import eyeSlashIcon from '../assets/eye-slash.svg'
 
 
 function Register(){
@@ -13,6 +15,9 @@ function Register(){
         ConfirmPassword : "",
         Agree : false
     })
+
+    const [ passwordLookupToggle, setPasswordLookupToggle ] = useState(false)
+    const [ conPasswordLookupToggle, setConPasswordLookupToggle ] = useState(false)
 
     const handleChange = (e) => {
         setRegisterData({... registerData , Agree : e.target.checked}); 
@@ -60,7 +65,10 @@ function Register(){
                             </div>
                             <div className='w-full'>
                                 <p className='text-sm KoHo text-gray-500'>Password</p>
-                                <input onChange={(e)=>{setRegisterData({...registerData,Password : e.target.value})}} type="Password" className='px-1 w-full bg-gray-100 rounded border-1 border-gray-300'/>
+                                <div className='flex'>
+                                    <input onChange={(e)=>{setRegisterData({...registerData,Password : e.target.value})}} type={!passwordLookupToggle? "Password" : 'Text'} className='px-1 w-full bg-gray-100 rounded border-1 border-gray-300'/>
+                                    <img onClick={()=>setPasswordLookupToggle(!passwordLookupToggle)} className='w-5 mx-1 hover:cursor-pointer' src={passwordLookupToggle ? eyeIcon : eyeSlashIcon} alt="" />
+                                </div>
                                 <p className={`text-xs KoHo ${registerData.Password.length >=6 ? `text-green-500` : 'text-red-500'} wrap-break-word`}>Passwords must be at least 6 characters.</p>
                                 <p className={`text-xs KoHo ${/[^a-zA-Z0-9]/.test(registerData.Password) ? `text-green-500` : 'text-red-500'} wrap-break-word`}>Passwords must have at least one non alphanumeric character.</p>
                                 <p className={`text-xs KoHo ${/\d/.test(registerData.Password) ? `text-green-500` : 'text-red-500'} wrap-break-word`}>Passwords must have at least one digit ('0'-'9').</p>
@@ -68,7 +76,11 @@ function Register(){
                             </div>
                             <div className='w-full'>
                                 <p className='text-sm KoHo text-gray-500'>Confirm Password</p>
-                                <input onChange={(e)=>{setRegisterData({...registerData, ConfirmPassword : e.target.value})}} type="Password" className='px-1 w-full bg-gray-100 rounded border-1 border-gray-300'/>
+                                <div className='flex'>
+                                    <input onChange={(e)=>{setRegisterData({...registerData, ConfirmPassword : e.target.value})}} type={!conPasswordLookupToggle? "Password" : 'Text'} className='px-1 w-full bg-gray-100 rounded border-1 border-gray-300'/>
+                                    <img onClick={()=>setConPasswordLookupToggle(!conPasswordLookupToggle)} className='w-5 mx-1 hover:cursor-pointer' src={conPasswordLookupToggle ? eyeIcon : eyeSlashIcon} alt="" />
+                                </div>
+                                
                             </div>
                             <div className='flex gap-1'>
                                 <input type="checkbox" checked={registerData.Agree} onChange={handleChange}/>

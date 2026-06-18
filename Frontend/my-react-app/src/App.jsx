@@ -8,6 +8,7 @@ import User from './pages/user'
 import Search from './pages/search'
 import Donate from './pages/donate'
 import MusicianUi from './pages/musicianUI'
+import DonateHistory from './pages/donateHistory'
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
         <Route path='/user/:Username' element={<User/>}>{}</Route>
         <Route path='/search' element={<Search/>}></Route>
         <Route path='/donate/:Username' element={<Donate/>}></Route>
+        <Route path='/user/:Username/history' element={<DonateHistory/>}></Route>
       </Routes>
     </BrowserRouter>
   )
