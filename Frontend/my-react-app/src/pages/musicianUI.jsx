@@ -22,6 +22,25 @@ function MusicianUi(){
         UserId : ""
     })
 
+    const [ onlineToggle, setOnlineToggle ] = useState(false)
+
+    const handleDonationStatus = async()=>{
+        const token = localStorage.getItem('token')
+        const res = await fetch(`${API}/api/user/donation/toggle`,{
+            method : 'PUT',
+            headers : {
+                'Authorization' : `Bearer ${token}`
+            }
+        })
+        const data = await res.json()
+        if (!res.ok){
+            console.log(data.message)
+        }else{
+            setOnlineToggle(data.isOpenDonation)
+        }
+        
+    }
+
     const handleAddQueue = (item)=>{
         setQueue(prev => [...prev, item])
 
@@ -73,7 +92,21 @@ function MusicianUi(){
                 console.log('error token missing')
             }
         }
-
+        const getConnectionStatus = async()=>{
+            const res = await fetch(`${API}/api/user/donation`,{
+                method : 'GET',
+                headers : {
+                    'Authorization' : `Bearer ${token}`
+                }
+            })
+            const data = await res.json()
+            if (!res.ok){
+                console.log(data.message)
+            }else{
+                setOnlineToggle(data.isOpenDonation)
+            }
+        }
+        getConnectionStatus()
     },[])
 
     useEffect(()=>{
@@ -134,13 +167,21 @@ function MusicianUi(){
                         <div className='flex justify-center py-3'>
                             <p className='KoHo font-semibold text-xl'>หน้าต่าง Donate (นักดนตรี)</p>
                         </div>
-                        <div className="w-full flex justify-end px-10">
-                            <p className="text-xs">status : </p>
-                            <p className={`text-xs ${
-                                connectionStatus === 'disconnected' ? 'text-yellow-500' :
-                                connectionStatus == 'reconnecting' ? 'text-yellow-500' :
-                                connectionStatus == 'disconnected' ? 'text-red-500' :
-                                'text-green-500' }`}>{connectionStatus}</p>
+                        <div className="w-full flex justify-between px-10 pb-1 items-baseline">
+                            <div className="flex items-center gap-1 mx-1">
+                                <button className={`toggle-btn ${onlineToggle ? "toggled" : ""}`} onClick={()=> handleDonationStatus()}>
+                                    <div className="thumb"></div>
+                                </button>
+                                <p className={`text-xs ${onlineToggle? "text-green-500" : "text-gray-500"}`}>{onlineToggle? "เปิดรับ Donate" : "ปิดรับ Donate"}</p>
+                            </div>
+                            <div className="flex">
+                                <p className="text-xs">status : </p>
+                                <p className={`text-xs ${
+                                    connectionStatus === 'disconnected' ? 'text-yellow-500' :
+                                    connectionStatus == 'reconnecting' ? 'text-yellow-500' :
+                                    connectionStatus == 'disconnected' ? 'text-red-500' :
+                                    'text-green-500' }`}>{connectionStatus}</p>
+                            </div>
                         </div>
                         <div className="w-full flex justify-between px-10 h-100">
                             <div className="w-[48%] bg-white border-gray-300 border-1 h-full overflow-y-scroll">

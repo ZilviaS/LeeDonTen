@@ -22,13 +22,7 @@ public class DonationHub : Hub
 
         if (!string.IsNullOrEmpty(userId))
         {
-            var user = await context.Users.FindAsync(userId);
-            if (user != null)
-            {
-                user.IsOpenDonations = true;
-                await context.SaveChangesAsync();
-            }
-
+            Console.WriteLine("User " + userId + "connect to Group");
             await Groups.AddToGroupAsync(Context.ConnectionId, userId);
         }
 
@@ -41,13 +35,7 @@ public class DonationHub : Hub
 
         if (!string.IsNullOrEmpty(userId))
         {
-            var user = await context.Users.FindAsync(userId);
-
-            if (user != null)
-            {
-                user.IsOpenDonations = false;
-                await context.SaveChangesAsync();
-            }
+            Console.WriteLine("User " + userId + "disconnect from Group");
         }
 
         await base.OnDisconnectedAsync(exception);

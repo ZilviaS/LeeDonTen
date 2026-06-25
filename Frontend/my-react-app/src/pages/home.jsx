@@ -1,8 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../App'
-import AeroheadLogo from '../assets/arrowhead.svg'
 
 function Home(){
+
+    const API = import.meta.env.VITE_API
+    const [ serverStatus, setServerStatus ] = useState('offline')
+
+    useEffect(()=>{
+        const serverStatusHandler = async()=>{
+            setServerStatus('pending')
+            try{
+                const res = await fetch(`${API}/api/server`)
+                if(res.ok){
+                    setServerStatus('online')
+                }else{
+                    setServerStatus('offline')
+                }
+            }catch{
+                setServerStatus('offline')
+            }
+        }
+        serverStatusHandler()
+    },[])
 
     return(
         <>
@@ -36,7 +55,14 @@ function Home(){
                             </p>
                         </div>
                     </div>
-                    <footer className='bg-gray-100 p-1 text-sm text-gray-800'>สามารถติดต่อได้ที่ E-MAIL: prepatjarundechakorn@gmail.com</footer>
+                    <footer className='flex justify-between bg-gray-100 p-1'>
+                        <p className='text-sm text-gray-800'>สามารถติดต่อได้ที่ E-MAIL: prepatjarundechakorn@gmail.com</p>
+                        <div className='flex items-baseline '>
+                            <p className='text-sm text-gray-800 pr-1'>server:</p>
+                            <div className={`h-2 w-2 rounded-full ${serverStatus == 'online' ? "bg-green-700" : serverStatus == 'pending'? "bg-yellow-500" : "bg-red-500"}`}/>
+                            <p className='text-sm text-gray-800 pl-1'>{serverStatus}</p>
+                        </div>
+                    </footer>
                 </section>
             </section>
         </>

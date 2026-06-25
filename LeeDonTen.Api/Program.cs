@@ -84,6 +84,7 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
 
 builder.Services.AddCors(options =>
 {
@@ -101,6 +102,26 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // app.UseHttpsRedirection();
+
+// using (var scope = app.Services.CreateScope()){
+//     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+//     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+//     if (!await roleManager.RoleExistsAsync("Admin"))
+//     {
+//         await roleManager.CreateAsync(new IdentityRole("Admin"));
+//     }
+
+//     var adminUser = await userManager.FindByNameAsync("Admin");
+
+//     if(adminUser != null)
+//     {
+//         if(!await userManager.IsInRoleAsync(adminUser, "Admin"))
+//         {
+//             await userManager.AddToRoleAsync(adminUser, "Admin");
+//         }
+//     }
+// }
 
 app.UseRouting();
 

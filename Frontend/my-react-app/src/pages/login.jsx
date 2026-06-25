@@ -11,7 +11,6 @@ function Login(){
     })
 
     const navigate = useNavigate()
-    
 
     const handleLogin = async ()=>{
         const res = await fetch(`${API}/api/user/login`,{
@@ -24,12 +23,12 @@ function Login(){
 
         const resData = await res.json()
         if (res.ok){
+            console.log(resData);
             localStorage.setItem("token",resData.token)
             navigate('/musician')
         }else{
             console.log(resData)
         }
-        
     }
 
     return(

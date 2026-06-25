@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using LeeDonTen.Api.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace LeeDonTen.Api.Service;
@@ -9,18 +10,26 @@ namespace LeeDonTen.Api.Service;
 public class JwtService{
 
     private readonly IConfiguration configuration;
-    public JwtService(IConfiguration configuration)
+    private readonly UserManager<User> userManager;
+    public JwtService(IConfiguration configuration, UserManager<User> userManager)
     {
         this.configuration = configuration;
+        this.userManager = userManager;
     }
 
-    public string GenerateToken(User user)
+    public async Task<string> GenerateToken(User user)
     {
-        var claim = new[]
+        var claim = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name,user.UserName ?? "")
+            new Claim(ClaimTypes.Name,user.UserName ?? ""),
         };
+
+        var role = await userManager.GetRolesAsync(user);
+
+        claim.AddRange(
+            role.Select(role => new Claim(ClaimTypes.Role, role))
+        );
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)

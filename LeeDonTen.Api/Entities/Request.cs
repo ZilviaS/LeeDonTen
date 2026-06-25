@@ -21,6 +21,10 @@ public class Request
     public Status Status {get; set;}
     public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
 
+    public ICollection<Payment> Payments { get; set; }
+        = new List<Payment>();
+    
+
 }
 public enum Status{
     PendingPayment,

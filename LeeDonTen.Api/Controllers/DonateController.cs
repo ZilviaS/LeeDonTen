@@ -13,6 +13,7 @@ using Microsoft.OpenApi;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.ComponentModel.Design.Serialization;
 
 namespace LeeDonTen.Api.Controllers;
 
@@ -34,7 +35,6 @@ public class DonateController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Donate(DonateDto dto)
     {
-
         var user =  await userManager.FindByIdAsync(dto.UserId);
 
         if (user is null)
@@ -59,36 +59,116 @@ public class DonateController : ControllerBase
             {
                 message = "error, please fill all the information"
             });
+        
         }
 
-        var request = new Request{
-            UserId = user.Id,
-            DonorName = dto.DonorName,
-            SongName = dto.SongName,
-            Message = dto.Message,
-            Amount = dto.Amount,
-            Status = Status.Paid
-        };
-        Console.WriteLine("donate");
-        context.Requests.Add(request);
-        context.SaveChanges();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
-        Console.WriteLine($"SEND TO GROUP : {request.UserId}");
-
-        await hubContext.Clients.Group(request.UserId)
-            .SendAsync("NewDonation", new
-            {
-                id = request.Id,
-                donor = dto.DonorName,
-                song = dto.SongName,
-                amount = dto.Amount,
-                message = dto.Message
-            });
-        
-        return Ok(new
+        try
         {
-            Message = "donate finished"
-        });
+            var request = new Request{
+                UserId = user.Id,
+                DonorName = dto.DonorName,
+                SongName = dto.SongName,
+                Message = dto.Message,
+                Amount = dto.Amount,
+                Status = Status.PendingPayment
+            };
+
+            context.Requests.Add(request);
+            await context.SaveChangesAsync();
+
+            var payment = new Payment
+            {
+                RequestId = request.Id,
+                Amount = request.Amount,
+                Status = PaymentStatus.Pending,
+                PaymentReference = Guid.NewGuid().ToString()
+            };
+
+            context.Payments.Add(payment);
+
+            await context.SaveChangesAsync();
+
+            // request.Status = Status.Paid;
+
+            // await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return Ok(new
+            {
+                Reference = payment.PaymentReference,
+            });
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return StatusCode(500, new {
+                message = ex.Message});
+        }
+    }
+    [HttpPost("donate/webhook")]
+    public async Task<IActionResult> DonateUpdate(PaymentDto dto)
+    {
+        if(dto.Status is not (0 or 1))
+        {
+            return BadRequest();
+        }
+
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var payment = await context.Payments
+                .Include(p => p.Request)
+                .FirstOrDefaultAsync(p => p.PaymentReference == dto.PaymentReference);
+
+            if (payment is null)
+                return NotFound();
+
+            var request = payment.Request;
+
+            if(payment.Status == PaymentStatus.Success)
+            {
+                await transaction.RollbackAsync();
+                return Ok();
+            }
+
+            if(dto.Status == 0)
+            {
+                request.Status = Status.Cancelled;
+                payment.Status = PaymentStatus.Fail;
+            }
+            else if(dto.Status == 1)
+            {
+                request.Status = Status.Paid;
+                payment.Status = PaymentStatus.Success;
+            }
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            if(dto.Status == 1)
+            {
+                Console.WriteLine($"SEND TO GROUP : {request.UserId}");
+
+                await hubContext.Clients.Group(request.UserId)
+                    .SendAsync("NewDonation", new
+                    {
+                        id = request.Id,
+                        donor = request.DonorName,
+                        song = request.SongName,
+                        amount = request.Amount,
+                        message = request.Message
+                    });
+            }
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return StatusCode(500, ex.Message);
+        }
     }
 
     [HttpPut("update/{requestId}/cancel")]
@@ -151,7 +231,6 @@ public class DonateController : ControllerBase
     [HttpGet("info")]
     public IActionResult GetDonateInfo()
     {
-        Console.WriteLine("You are here");
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (userId == null)
@@ -165,5 +244,7 @@ public class DonateController : ControllerBase
 
         return Ok(data);
     }
+
+    
     
 }

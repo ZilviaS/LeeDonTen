@@ -224,16 +224,16 @@ function DonateHistory(){
                     </div>
                     <div className='h-[80%] bg-white flex-col flex items-center'>
                         <div className='flex justify-center py-5'>
-                            <p className='KoHo font-semibold text-xl'>Donate History</p>
+                            <p className='KoHo font-semibold text-xl'>Donate History ({user.Username})</p>
                         </div>
                         <div className="flex w-full justify-center px-3">
                             <div className="">
                                 <div className="flex justify-between">
-                                    <div className="flex pb-1 gap-3">
+                                    <div className="flex pb-1 gap-3 items-center">
                                         <input onChange={(e)=>{setSearchTerm(e.target.value)}} value={searchTerm} type="text" className="bg-gray-100 border-1 border-gray-300 px-1 text-sm" placeholder="ค้นหา"/>
                                         <div className="flex gap-1">
                                             <input type="checkbox" defaultChecked checked={unpaidBlind} onChange={(e) => setUnpaidBlind(e.target.checked)}/>
-                                            <p className="text-sm font-light items-baseline">แสดงข้อมูลที่จ่ายไม่สำเร็จ</p>
+                                            <p className="text-xs font-light">แสดงข้อมูลที่จ่ายไม่สำเร็จ</p>
                                         </div>
                                     </div>
                                     <div className="pr-4 hover:cursor-pointer">

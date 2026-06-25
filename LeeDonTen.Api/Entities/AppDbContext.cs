@@ -1,4 +1,3 @@
-using LeeDonTen.Api.Payments;
 using LeeDonTen.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -15,6 +14,6 @@ public class AppDbContext: IdentityDbContext<User>
     // public DbSet<User> Users => Set<User>();
     public DbSet<Request> Requests => Set<Request>();
     public DbSet<Payment> Payments => Set<Payment>();
-    
+    public DbSet<Withdraws> Withdraws => Set<Withdraws>();
 }
 

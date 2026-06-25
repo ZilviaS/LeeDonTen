@@ -1,9 +1,8 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useEffect, useState } from 'react'
+import QRCode from '../assets/Rickrolling_QR_code.png'
 
 function Donate(){
-
-    const navigate = useNavigate()
 
     const API = import.meta.env.VITE_API
 
@@ -21,6 +20,8 @@ function Donate(){
     
     const [ errorLog , setErrorLog ] = useState('')
 
+    const [ paymentReference, setPaymentReference ] = useState('')
+
     const handleDonate = async()=>{
         if(request.UserId == null){
             setErrorLog("something went wrong")
@@ -37,8 +38,46 @@ function Donate(){
             if(!res.ok){
                 setErrorLog(data.message)
             }else{
-                setPageState('success')
+                setPageState('pay')
+                console.log(data)
+                setPaymentReference(data.reference)
             }
+        }
+    }
+
+    const handlePay = async()=>{
+        const payload = {
+            PaymentReference : paymentReference,
+            Status: 0
+        }
+        console.log("pay",paymentReference)
+        const res = await fetch(`${API}/api/donate/donate/webhook`,{
+            method : 'POST',
+            headers : {
+                'content-type' : 'application/json'
+            },
+            body : JSON.stringify(payload)
+        })
+        if (res.ok){
+            setPageState('success')
+        }
+    }
+
+    const handleNotPay = async()=>{
+        const payload = {
+            PaymentReference : paymentReference,
+            Status: 0
+        }
+        console.log("not")
+        const res = await fetch(`${API}/api/donate/donate/webhook`,{
+            method : 'POST',
+            headers : {
+                'content-type' : 'application/json'
+            },
+            body : JSON.stringify(payload)
+        })
+        if (res.ok){
+            setPageState('success')
         }
     }
 
@@ -57,6 +96,8 @@ function Donate(){
 
         handleUserId()
     },[])
+
+    useEffect(()=>console.log(pageState),[pageState])
 
     return(
         <>
@@ -99,7 +140,7 @@ function Donate(){
                                 <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/terms">ข้อตกลงการใช้งาน</a>
                             </div>
                         </div>
-                    </> : <>
+                    </> : pageState == 'success' ? <>
                         <div className='h-[80%] bg-white flex-col flex justify-center'>
                                 <p className="w-full text-center text-5xl">🙏</p>
                                 <p className="w-full text-center KoHo font-semibold">ขอบคุณ {request.DonorName} สำหรับการโดเนต</p>
@@ -109,7 +150,22 @@ function Donate(){
                                 </div>
 
                         </div>
-                    </>}
+                    </> : pageState == 'pay' ?
+                    <>
+                        <div className='h-[80%] bg-white'>
+                            <div className="flex flex-col items-center">
+                                <p className="text-xl font-bold pt-5 pb-3 KoHo">QR Code</p>
+                                <img className="h-50 w-50" src={QRCode} alt="" />
+                                <div className="flex gap-3 mt-5">
+                                    <button onClick={()=>handlePay()} className="px-4 bg-green-500 text-white rounded hover:cursor-pointer">จ่าย</button>
+                                    <button onClick={()=>handleNotPay()} className="px-4 bg-red-500 text-white rounded hover:cursor-pointer">ติดใว้ก่อน</button>
+                                </div>
+                                
+                            </div>
+                            
+                        </div>
+                    </> : <></>
+                    }
                     
                 </section>
             </section>

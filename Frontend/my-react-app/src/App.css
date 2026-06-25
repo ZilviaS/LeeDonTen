@@ -8,3 +8,36 @@
 .KoHo{
   font-family: "KoHo", sans-serif;
 }
+
+.toggle-btn{
+  background-color: #b7b9ba;
+  border: 1px solid #aaa;
+  border-radius: 99px;
+  width: 40px;
+  height: 20px;
+  transition: background-color 0.1s ease, border-color 0.2s ease;
+  cursor: pointer;
+  
+  position: relative;
+}
+
+.toggle-btn .thumb {
+  height: 15px;
+  width: 15px;
+  background-color: #fff;
+  border-radius: 99px;
+  transform: translateX(0);
+  transition: left 0.15s ease;
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.toggle-btn.toggled{ 
+  background-color: #00CDAA;
+}
+
+.toggle-btn.toggled .thumb{
+  left: calc(40px - 20px)
+}

@@ -3,6 +3,7 @@ using System;
 using LeeDonTen.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeeDonTen.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260620084205_CreateWithDraw")]
+    partial class CreateWithDraw
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,54 +137,6 @@ namespace LeeDonTen.Api.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("LeeDonTen.Api.Entities.Withdraws", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("PaymentOption")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("ProcessAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ReferenceNo")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Remark")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Withdraws");
-                });
-
             modelBuilder.Entity("LeeDonTen.Api.Payments.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -207,12 +162,10 @@ namespace LeeDonTen.Api.Migrations
                     b.Property<int>("RequestId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("Statis")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RequestId");
 
                     b.ToTable("Payments");
                 });
@@ -349,28 +302,6 @@ namespace LeeDonTen.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("LeeDonTen.Api.Entities.Withdraws", b =>
-                {
-                    b.HasOne("LeeDonTen.Api.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LeeDonTen.Api.Payments.Payment", b =>
-                {
-                    b.HasOne("LeeDonTen.Api.Entities.Request", "Request")
-                        .WithMany("Payments")
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Request");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -420,11 +351,6 @@ namespace LeeDonTen.Api.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("LeeDonTen.Api.Entities.Request", b =>
-                {
-                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

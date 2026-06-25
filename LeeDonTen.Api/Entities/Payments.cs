@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using LeeDonTen.Api.Entities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LeeDonTen.Api.Payments;
+namespace LeeDonTen.Api.Entities;
 
 public class Payment
 {
@@ -10,12 +10,13 @@ public class Payment
     public int Id {get; set;}
     [Required]
     public int RequestId {get; set;}
+    public Request Request {get; set;} = null!;
     [Required]
     public decimal Amount {get; set;}
     public string QRPayload {get; set;} = string.Empty;
     public string PaymentReference {get; set;} = string.Empty;
     [Required]
-    public PaymentStatus Statis {get; set;}
+    public PaymentStatus Status {get; set;}
     public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
 }
 
