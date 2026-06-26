@@ -239,7 +239,7 @@ public class UserController : ControllerBase
             });
         }
 
-        var balance = balanceService.GetBalance(user.Id);
+        var balance = await balanceService.GetBalanceAsync(user.Id);
         return Ok(new
         {
             total = balance

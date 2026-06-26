@@ -1,9 +1,10 @@
 using LeeDonTen.Api.Data;
 using LeeDonTen.Api.Entities;
+using Microsoft.EntityFrameworkCore;
 
 public interface IUserBalanceService
 {
-    decimal GetBalance(string userId);
+    Task<decimal> GetBalanceAsync(string userId);
 }
 
 public class UserBalanceService : IUserBalanceService
@@ -13,17 +14,19 @@ public class UserBalanceService : IUserBalanceService
     {
         this.context = context;
     }
-    public decimal GetBalance(string userId)
+    public async Task<decimal> GetBalanceAsync(string userId)
     {
-        var totalEarning = context.Payments
+        var totalEarning = await context.Payments
             .Where(p=> 
                     p.Status == PaymentStatus.Success &&
                 p.Request.UserId == userId)
-            .Sum(p=> p.Amount);
+            .SumAsync(p=> p.Amount);
 
-        var totalWithdraw = context.Withdraws
+        var totalWithdraw = await context.Withdraws
             .Where(w=> w.Status == WithdrawStatus.Success &&
-                w.UserId == userId).Sum(w => w.Amount);
+                w.UserId == userId).SumAsync(w => w.Amount);
+
+        Console.WriteLine("Total Earning : " + totalEarning + " Total Withdraw : " + totalWithdraw);
 
         return totalEarning - totalWithdraw;
     }

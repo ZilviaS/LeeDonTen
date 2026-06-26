@@ -7,3 +7,7 @@ public record class WithdrawRequestDto
     string AccountNumber,
     decimal Amount
 );
+
+public record class DeniedRequestDTO(
+    string Remark
+);

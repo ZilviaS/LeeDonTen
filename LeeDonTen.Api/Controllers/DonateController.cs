@@ -108,7 +108,8 @@ public class DonateController : ControllerBase
                 message = ex.Message});
         }
     }
-    [HttpPost("donate/webhook")]
+
+    [HttpPost("webhook")]
     public async Task<IActionResult> DonateUpdate(PaymentDto dto)
     {
         if(dto.Status is not (0 or 1))
@@ -136,13 +137,18 @@ public class DonateController : ControllerBase
 
             if(dto.Status == 0)
             {
-                request.Status = Status.Cancelled;
+                request.Status = Status.Unpaid;
                 payment.Status = PaymentStatus.Fail;
             }
             else if(dto.Status == 1)
             {
                 request.Status = Status.Paid;
                 payment.Status = PaymentStatus.Success;
+            }
+            else
+            {
+                await transaction.RollbackAsync();
+                return BadRequest();
             }
             
             await context.SaveChangesAsync();
@@ -170,6 +176,7 @@ public class DonateController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+
 
     [HttpPut("update/{requestId}/cancel")]
     public IActionResult CancelRequest(int requestId)

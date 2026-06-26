@@ -26,7 +26,7 @@ function DonateHistory(){
 
     const [ searchTerm , setSearchTerm ] = useState('')
 
-    const [ unpaidBlind , setUnpaidBlind ] = useState(true)
+    const [ unpaidBlind , setUnpaidBlind ] = useState(false)
 
     const [ donateInfo, setDonateInfo ] = useState([])
 
@@ -44,12 +44,14 @@ function DonateHistory(){
 
     const handleStatusCheck = (status)=>{
         if (status == 0){
-            return 'unpaid'
+            return 'pending'
         }else if (status == 1){
             return 'paid'
         }else if (status == 2){
-            return 'played'
+            return 'unpaid'
         }else if (status == 3){
+            return 'played'
+        }else if (status == 4){
             return 'cancelled'
         }else {
             return 'unknown'
@@ -70,7 +72,7 @@ function DonateHistory(){
             info.formattedDate?.toLowerCase().includes(keyword))
         )
 
-        const passUnpaidFilter = !unpaidBlind || info.statusText !== 'unpaid'
+        const passUnpaidFilter = unpaidBlind || info.statusText !== 'unpaid'
 
         return matchSearch && passUnpaidFilter
     }).sort((a,b) => {
@@ -86,7 +88,7 @@ function DonateHistory(){
     )
 
     const dailyData = Object.values(
-        donateInfo.reduce((acc, item)=>{
+        donateInfo.filter(item => item.status != 2).reduce((acc, item)=>{
             const date = item.createdAt.split("T")[0]
 
             if(!acc[date]){
@@ -109,7 +111,7 @@ function DonateHistory(){
         "#f59e0b"
     ]
     const donorData = Object.values(
-        donateInfo.reduce((acc, item)=>{
+        donateInfo.filter(item => item.status != 2).reduce((acc, item)=>{
             if (!acc[item.donorName]) {
                 acc[item.donorName] = {
                     donor : item.donorName,

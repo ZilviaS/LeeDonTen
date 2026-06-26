@@ -42,7 +42,7 @@ public class WithdrawController : ControllerBase
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost]
-    public IActionResult RequestWithdraw(WithdrawRequestDto dto) 
+    public async Task<IActionResult> RequestWithdraw(WithdrawRequestDto dto) 
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
@@ -63,7 +63,7 @@ public class WithdrawController : ControllerBase
             });
         }
 
-        var balance = balanceService.GetBalance(userId);
+        var balance = await balanceService.GetBalanceAsync(userId);
         Console.WriteLine(balance);
         if(dto.Amount > balance)
         {
@@ -124,6 +124,83 @@ public class WithdrawController : ControllerBase
             w.Status,
             w.User.UserName,
         }));
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [HttpPost("{Id}/success")]
+    public async Task<IActionResult> RequestGranted(int Id)
+    {
+        var withdraw = await context.Withdraws.FirstOrDefaultAsync(d => d.Id == Id);
+        if (withdraw == null)
+        {
+            return NotFound();
+        }
+
+        if(withdraw.Status != WithdrawStatus.Pending)
+        {
+            return BadRequest(new
+            {
+                message = "this request has been processed"
+            });
+        }
+        
+        using var transaction = await context.Database.BeginTransactionAsync();
+
+        var balance = await balanceService.GetBalanceAsync(withdraw.UserId);
+        if (balance < withdraw.Amount)
+        {
+            await transaction.RollbackAsync();
+            return BadRequest(new
+            {
+                message = "user dont have enough money"
+            });
+        }
+
+        try
+        {
+            withdraw.Status = WithdrawStatus.Success;
+            withdraw.ReferenceNo = $"WD{DateTime.UtcNow:yyyyMMddHHmmss}{Random.Shared.Next(1000, 9999)}";;
+            withdraw.ProcessAt = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return Ok();
+        }catch(Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [HttpPost("{Id}/reject")]
+    public async Task<IActionResult> RequestDenied(int Id, DeniedRequestDTO dto )
+    {
+        var withdraw = await context.Withdraws.FirstOrDefaultAsync(data => data.Id == Id);
+        if(withdraw == null)
+        {
+            return NotFound();
+        }
+
+        if(withdraw.Status != WithdrawStatus.Pending)
+        {
+            return BadRequest();
+        }
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            withdraw.Remark = dto.Remark;
+            withdraw.Status = WithdrawStatus.Reject;
+            withdraw.ProcessAt = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return Ok();
+        }catch(Exception err)
+        {
+            await transaction.RollbackAsync();
+            return StatusCode(500, new{
+                message = err.Message});
+        }
     }
 
     // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]

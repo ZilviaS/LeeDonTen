@@ -48,10 +48,10 @@ function Donate(){
     const handlePay = async()=>{
         const payload = {
             PaymentReference : paymentReference,
-            Status: 0
+            Status: 1
         }
         console.log("pay",paymentReference)
-        const res = await fetch(`${API}/api/donate/donate/webhook`,{
+        const res = await fetch(`${API}/api/donate/webhook`,{
             method : 'POST',
             headers : {
                 'content-type' : 'application/json'
@@ -69,7 +69,7 @@ function Donate(){
             Status: 0
         }
         console.log("not")
-        const res = await fetch(`${API}/api/donate/donate/webhook`,{
+        const res = await fetch(`${API}/api/donate/webhook`,{
             method : 'POST',
             headers : {
                 'content-type' : 'application/json'

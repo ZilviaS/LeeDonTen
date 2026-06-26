@@ -9,6 +9,8 @@ function AdminManage(){
 
     const [ requestInfo, setRequestInfo ] = useState([])
 
+    const [ errorLog, setErrorLog ] = useState('')
+
     const handleLogout = ()=>{
         localStorage.removeItem('token')
         navigate('/')
@@ -60,6 +62,23 @@ function AdminManage(){
         }
     } 
 
+    const RequestGrantedHandle = async(Id)=>{
+        const token = localStorage.getItem("token")
+        const res = await fetch(`${API}/api/withdraw/${Id}/success`,{
+            method : 'POST',
+            headers : {
+                'Authorization' : `Bearer ${token}`
+            }
+        })
+        if(res.ok){
+            window.location.reload()
+        }else{
+            const data = await res.json()
+            console.log(data)
+            setErrorLog(data.message)
+        }
+    }
+
     useEffect(()=>{
         const handleRequest = async ()=>{
             const token = localStorage.getItem("token")
@@ -94,6 +113,9 @@ function AdminManage(){
                         <div className='flex justify-center py-5'>
                             <p className='KoHo font-semibold text-xl'>ระบบจัดการ Request (Admin)</p>
                         </div>
+                        <div className="flex justify-center">
+                            <p>{errorLog}</p>
+                        </div>
                         <div className="flex justify-between h-100">
                             <div className="overflow-y-scroll">
                                 <table>
@@ -120,10 +142,13 @@ function AdminManage(){
                                                 <td className="text-right bg-white border-1 px-1 text-sm">{new Date(item.createdAt).toLocaleString('th-TH')}</td>
                                                 <td className="text-right bg-white border-1 px-1 text-sm">{statusHandle(item.status)}</td>
                                                 <td className="text-right bg-white border-1 px-1 text-sm">
-                                                    <div className="flex gap-2">
-                                                        <button className="bg-green-500 text-sm text-white rounded px-1 my-1 hover:cursor-pointer">อนุมัติ</button>
-                                                        <button className="bg-red-500 text-sm text-white rounded px-1 my-1 hover:cursor-pointer">ยกเลิก</button>
-                                                    </div> 
+                                                    {item.status == 0 ? <>
+                                                        <div className="flex gap-2">
+                                                            <button onClick={()=>{RequestGrantedHandle(item.id)}} className="bg-green-500 text-sm text-white rounded px-1 my-1 hover:cursor-pointer">อนุมัติ</button>
+                                                            <button className="bg-red-500 text-sm text-white rounded px-1 my-1 hover:cursor-pointer">ปฏิเสธ</button>
+                                                        </div> 
+                                                    </> : <></>}
+
                                                 </td>
                                             </tr>
                                         ))}
