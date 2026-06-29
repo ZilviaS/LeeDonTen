@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.SignalR;
 using LeeDonTen.Api.Hubs;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
