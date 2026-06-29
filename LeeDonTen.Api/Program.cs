@@ -20,7 +20,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddControllers();
-
 builder.Services.AddSignalR();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -48,21 +47,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnAuthenticationFailed = context =>
             {
-                Console.WriteLine("AUTH FAILED");
-                Console.WriteLine(context.Exception.Message);
+                // Console.WriteLine("AUTH FAILED");
+                // Console.WriteLine(context.Exception.Message);
                 return Task.CompletedTask;
             },
 
             OnTokenValidated = context =>
             {
-                Console.WriteLine("TOKEN VALIDATED");
+                // Console.WriteLine("TOKEN VALIDATED");
                 return Task.CompletedTask;
             },
             OnMessageReceived = context =>
             {
                 var accessToken = context.Request.Query["access_token"];
 
-                Console.WriteLine($"TOKEN RECEIVED: {accessToken}");
+                // Console.WriteLine($"TOKEN RECEIVED: {accessToken}");
 
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) &&
@@ -86,42 +85,72 @@ builder.Services
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
 
+var frontendUrl = builder.Configuration["Frontend:Url"]!;
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-    policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials()
-        .WithOrigins("http://localhost:5173");
+            .WithOrigins("http://localhost:5173", frontendUrl)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
 var app = builder.Build();
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
-// using (var scope = app.Services.CreateScope()){
-//     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-//     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
-//     if (!await roleManager.RoleExistsAsync("Admin"))
-//     {
-//         await roleManager.CreateAsync(new IdentityRole("Admin"));
-//     }
+using (var scope = app.Services.CreateScope()){
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-//     var adminUser = await userManager.FindByNameAsync("Admin");
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
 
-//     if(adminUser != null)
-//     {
-//         if(!await userManager.IsInRoleAsync(adminUser, "Admin"))
-//         {
-//             await userManager.AddToRoleAsync(adminUser, "Admin");
-//         }
-//     }
-// }
+    var adminUser = await userManager.FindByNameAsync("Admin");
+
+    if(adminUser == null)
+    {
+        adminUser = new User
+        {
+            UserName = builder.Configuration["Admin:Username"],
+            Email = builder.Configuration["Admin:Email"],
+        };
+        var result = await userManager.CreateAsync(
+            adminUser,
+            builder.Configuration["Admin:Password"]!
+        );
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+        else
+        {
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine(error.Description);
+            }
+        }
+    }
+    else
+    {
+        if(!await userManager.IsInRoleAsync(adminUser, "Admin"))
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+}
 
 app.UseRouting();
 

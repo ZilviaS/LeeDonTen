@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeeDonTen.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260620093405_AddWithdraws")]
-    partial class AddWithdraws
+    [Migration("20260629065341_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,41 @@ namespace LeeDonTen.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("LeeDonTen.Api.Entities.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentReference")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("QRPayload")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId");
+
+                    b.ToTable("Payments");
+                });
 
             modelBuilder.Entity("LeeDonTen.Api.Entities.Request", b =>
                 {
@@ -185,41 +220,6 @@ namespace LeeDonTen.Api.Migrations
                     b.ToTable("Withdraws");
                 });
 
-            modelBuilder.Entity("LeeDonTen.Api.Payments.Payment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("PaymentReference")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("QRPayload")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("RequestId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequestId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -352,6 +352,17 @@ namespace LeeDonTen.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LeeDonTen.Api.Entities.Payment", b =>
+                {
+                    b.HasOne("LeeDonTen.Api.Entities.Request", "Request")
+                        .WithMany("Payments")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Request");
+                });
+
             modelBuilder.Entity("LeeDonTen.Api.Entities.Withdraws", b =>
                 {
                     b.HasOne("LeeDonTen.Api.Entities.User", "User")
@@ -361,17 +372,6 @@ namespace LeeDonTen.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LeeDonTen.Api.Payments.Payment", b =>
-                {
-                    b.HasOne("LeeDonTen.Api.Entities.Request", "Request")
-                        .WithMany("Payments")
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
