@@ -95,7 +95,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", frontendUrl ?? "http://localhost:5173")
+            .WithOrigins("http://localhost:5173", frontendUrl ?? "https://lee-don-ten.vercel.app/")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
