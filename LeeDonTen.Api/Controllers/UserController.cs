@@ -78,10 +78,11 @@ public class UserController : ControllerBase
             });
         }
 
-        Console.WriteLine("Register");
+        Console.WriteLine("Registered");
+        var token = await jwtService.GenerateToken(user);
         return Ok(new
         {
-            message = "The User is registered"
+            token
         });
     }
 

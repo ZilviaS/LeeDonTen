@@ -1,0 +1,6 @@
+POST http://localhost:4000/pay
+Content-Type: application/json
+
+{
+    "paymentId": 1
+}

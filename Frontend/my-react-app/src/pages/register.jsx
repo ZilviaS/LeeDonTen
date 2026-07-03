@@ -2,11 +2,14 @@ import { useState } from 'react'
 import '../App'
 import eyeIcon from '../assets/eye.svg'
 import eyeSlashIcon from '../assets/eye-slash.svg'
+import { useNavigate } from 'react-router-dom'
 
 
 function Register(){
 
     const API = import.meta.env.VITE_API
+
+    const navigate = useNavigate()
 
     const [ registerData, setRegisterData ] = useState({
         Username : "",
@@ -36,8 +39,9 @@ function Register(){
         const resData = await res.json()
         if(res.ok){
             console.log(resData.token)
+            localStorage.setItem("token",resData.token)
+            navigate('/musician')
         }
-        
     }
 
 

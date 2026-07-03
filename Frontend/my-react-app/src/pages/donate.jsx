@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from 'react'
-import QRCode from '../assets/Rickrolling_QR_code.png'
+import QRCode from "react-qr-code";
+import wrong from "../assets/wrong.png"
+import exclamation from "../assets/exclamation.png"
 
 function Donate(){
 
@@ -9,6 +11,8 @@ function Donate(){
     const { Username } = useParams()
 
     const [ pageState, setPageState ] = useState('donate')
+
+    const [paymentUrl, setPaymentUrl] = useState("");
 
     const [ request, setRequest ] = useState({
         UserId : '',
@@ -38,46 +42,11 @@ function Donate(){
             if(!res.ok){
                 setErrorLog(data.message)
             }else{
-                setPageState('pay')
+                setPageState('pending')
                 console.log(data)
                 setPaymentReference(data.reference)
+                setPaymentUrl(data.paymentUrl)
             }
-        }
-    }
-
-    const handlePay = async()=>{
-        const payload = {
-            PaymentReference : paymentReference,
-            Status: 1
-        }
-        console.log("pay",paymentReference)
-        const res = await fetch(`${API}/api/donate/webhook`,{
-            method : 'POST',
-            headers : {
-                'content-type' : 'application/json'
-            },
-            body : JSON.stringify(payload)
-        })
-        if (res.ok){
-            setPageState('success')
-        }
-    }
-
-    const handleNotPay = async()=>{
-        const payload = {
-            PaymentReference : paymentReference,
-            Status: 0
-        }
-        console.log("not")
-        const res = await fetch(`${API}/api/donate/webhook`,{
-            method : 'POST',
-            headers : {
-                'content-type' : 'application/json'
-            },
-            body : JSON.stringify(payload)
-        })
-        if (res.ok){
-            setPageState('success')
         }
     }
 
@@ -97,7 +66,52 @@ function Donate(){
         handleUserId()
     },[])
 
-    useEffect(()=>console.log(pageState),[pageState])
+    useEffect(()=>{
+        if (pageState !== "pending") return;
+
+        let count = 0
+
+        const interval = setInterval(async ()=>{
+        try {
+            const res = await fetch(`${API}/api/donate/status/${paymentReference}`);
+
+            if (!res.ok) {
+                clearInterval(interval);
+                return;
+            }
+
+            const data = await res.json();
+
+            count++;
+
+            console.log("sending : ",count)
+            console.log(data)
+
+            if (count >= 20) {
+                clearInterval(interval);
+                setPageState("timeout");
+                return;
+            }
+
+            if (data.status == 1) {
+                clearInterval(interval);
+                setPageState("success");
+            }
+
+            if (data.status == 2) {
+                clearInterval(interval);
+                setPageState("fail");
+            }
+
+        } catch {
+            clearInterval(interval);
+            setPageState("error");
+        }
+        }, 5000);
+
+        return () => clearInterval(interval)
+
+    }, [ pageState, paymentReference ])
 
     return(
         <>
@@ -140,6 +154,16 @@ function Donate(){
                                 <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/terms">ข้อตกลงการใช้งาน</a>
                             </div>
                         </div>
+                    </>  : pageState == 'pending' ?
+                    <>
+                        <div className='h-[80%] bg-white'>
+                            <div className="flex flex-col items-center">
+                                <p className="text-xl font-bold pt-5 pb-3 KoHo">Scan to Pay</p>
+                                <QRCode className="h-50 w-50" value={paymentUrl} />
+                                <p>or open</p>
+                                <a href={paymentUrl} className="text-sm underline hover:cursor-pointer">Open Payment Page</a>
+                            </div>
+                        </div>
                     </> : pageState == 'success' ? <>
                         <div className='h-[80%] bg-white flex-col flex justify-center'>
                                 <p className="w-full text-center text-5xl">🙏</p>
@@ -150,19 +174,29 @@ function Donate(){
                                 </div>
 
                         </div>
-                    </> : pageState == 'pay' ?
-                    <>
-                        <div className='h-[80%] bg-white'>
-                            <div className="flex flex-col items-center">
-                                <p className="text-xl font-bold pt-5 pb-3 KoHo">QR Code</p>
-                                <img className="h-50 w-50" src={QRCode} alt="" />
-                                <div className="flex gap-3 mt-5">
-                                    <button onClick={()=>handlePay()} className="px-4 bg-green-500 text-white rounded hover:cursor-pointer">จ่าย</button>
-                                    <button onClick={()=>handleNotPay()} className="px-4 bg-red-500 text-white rounded hover:cursor-pointer">ติดใว้ก่อน</button>
-                                </div>
-                                
+                    </> : pageState == 'fail' ? <>
+                        <div className='h-[80%] bg-white flex-col flex justify-center'>
+                            <div className="w-full flex justify-center">
+                                <img className="w-50" src={wrong}></img>
                             </div>
-                            
+                            <p className="w-full text-center KoHo mt-5 font-semibold">เกิดข้อผิดพลาด</p>
+                            <div className="w-full flex justify-center gap-2 mt-2">
+                                <button onClick={()=>{window.location.reload()}} className="px-2 py-1 bg-green-500 text-white rounded hover:cursor-pointer hover:bg-green-700">Donate ใหม่</button>
+                                <a href="/" className="px-2 py-1 bg-pink-500 text-white rounded hover:cursor-pointer hover:bg-pink-700">กลับหน้า Menu</a>
+                            </div>
+
+                        </div>
+                    </> : pageState == 'timeout' ? <>
+                        <div className='h-[80%] bg-white flex-col flex justify-center'>
+                            <div className="w-full flex justify-center">
+                                <img className="w-50" src={exclamation}></img>
+                            </div>
+                            <p className="w-full text-center KoHo mt-5 font-semibold">เกิดข้อผิดพลาด หมดเวลาตรวจสอบ</p>
+                            <p className="w-full text-center KoHo text-xs font-light text-red-500">*ผู้ใช้ยังสามารถจ่ายได้ตามปรกติ</p>
+                            <div className="w-full flex justify-center gap-2 mt-2">
+                                <button onClick={()=>{window.location.reload()}} className="px-2 py-1 bg-green-500 text-white rounded hover:cursor-pointer hover:bg-green-700">Donate ใหม่</button>
+                                <a href="/" className="px-2 py-1 bg-pink-500 text-white rounded hover:cursor-pointer hover:bg-pink-700">กลับหน้า Menu</a>
+                            </div>
                         </div>
                     </> : <></>
                     }

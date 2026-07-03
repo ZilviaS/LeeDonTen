@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.ComponentModel.Design.Serialization;
+using System.Net.Http.Json;
 
 namespace LeeDonTen.Api.Controllers;
 
@@ -23,18 +24,24 @@ public class DonateController : ControllerBase
     private readonly AppDbContext context;
     private readonly UserManager<User> userManager;
     private readonly IHubContext<DonationHub> hubContext;
+    private readonly HttpClient _httpClient;
+    private readonly IConfiguration configuration;
 
-    public DonateController(AppDbContext context, UserManager<User> userManager, IHubContext<DonationHub> hubContext)
+    public DonateController(AppDbContext context, UserManager<User> userManager, IHubContext<DonationHub> hubContext, IHttpClientFactory factory, IConfiguration configuration)
     {
         this.context = context;
         this.userManager = userManager;
         this.hubContext = hubContext;
+        _httpClient = factory.CreateClient();
+        this.configuration = configuration;
     }
 
     [HttpPost]
     public async Task<IActionResult> Donate(DonateDto dto)
     {
         var user =  await userManager.FindByIdAsync(dto.UserId);
+
+        var paymentPath = configuration["Payment:Url"];
 
         if (user is null)
         {
@@ -89,15 +96,14 @@ public class DonateController : ControllerBase
 
             await context.SaveChangesAsync();
 
-            // request.Status = Status.Paid;
-
-            // await context.SaveChangesAsync();
-
             await transaction.CommitAsync();
+
+            Console.WriteLine($"PaymentPath = {paymentPath}");
 
             return Ok(new
             {
                 Reference = payment.PaymentReference,
+                PaymentUrl = $"{paymentPath}/{payment.PaymentReference}"
             });
         }
         catch (Exception ex)
@@ -107,75 +113,20 @@ public class DonateController : ControllerBase
                 message = ex.Message});
         }
     }
-
-    [HttpPost("webhook")]
-    public async Task<IActionResult> DonateUpdate(PaymentDto dto)
+    [HttpGet("status/{reference}")]
+    public async Task<IActionResult> GetStatus(string reference)
     {
-        if(dto.Status is not (0 or 1))
+        var payment = await context.Payments
+            .FirstOrDefaultAsync(x => x.PaymentReference == reference);
+
+        if (payment == null)
+            return NotFound();
+
+        return Ok(new
         {
-            return BadRequest();
-        }
-
-        using var transaction = await context.Database.BeginTransactionAsync();
-        try
-        {
-            var payment = await context.Payments
-                .Include(p => p.Request)
-                .FirstOrDefaultAsync(p => p.PaymentReference == dto.PaymentReference);
-
-            if (payment is null)
-                return NotFound();
-
-            var request = payment.Request;
-
-            if(payment.Status == PaymentStatus.Success)
-            {
-                await transaction.RollbackAsync();
-                return Ok();
-            }
-
-            if(dto.Status == 0)
-            {
-                request.Status = Status.Unpaid;
-                payment.Status = PaymentStatus.Fail;
-            }
-            else if(dto.Status == 1)
-            {
-                request.Status = Status.Paid;
-                payment.Status = PaymentStatus.Success;
-            }
-            else
-            {
-                await transaction.RollbackAsync();
-                return BadRequest();
-            }
-            
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            if(dto.Status == 1)
-            {
-                Console.WriteLine($"SEND TO GROUP : {request.UserId}");
-
-                await hubContext.Clients.Group(request.UserId)
-                    .SendAsync("NewDonation", new
-                    {
-                        id = request.Id,
-                        donor = request.DonorName,
-                        song = request.SongName,
-                        amount = request.Amount,
-                        message = request.Message
-                    });
-            }
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            return StatusCode(500, ex.Message);
-        }
+            status = payment.Status
+        });
     }
-
 
     [HttpPut("update/{requestId}/cancel")]
     public IActionResult CancelRequest(int requestId)
