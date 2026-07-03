@@ -106,54 +106,54 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//     db.Database.Migrate();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
-// using (var scope = app.Services.CreateScope()){
-//     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-//     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+using (var scope = app.Services.CreateScope()){
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-//     if (!await roleManager.RoleExistsAsync("Admin"))
-//     {
-//         await roleManager.CreateAsync(new IdentityRole("Admin"));
-//     }
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
 
-//     var adminUser = await userManager.FindByNameAsync("Admin");
+    var adminUser = await userManager.FindByNameAsync("Admin");
 
-//     if(adminUser == null)
-//     {
-//         adminUser = new User
-//         {
-//             UserName = builder.Configuration["Admin:Username"],
-//             Email = builder.Configuration["Admin:Email"],
-//         };
-//         var result = await userManager.CreateAsync(
-//             adminUser,
-//             builder.Configuration["Admin:Password"]!
-//         );
-//         if (result.Succeeded)
-//         {
-//             await userManager.AddToRoleAsync(adminUser, "Admin");
-//         }
-//         else
-//         {
-//             foreach (var error in result.Errors)
-//             {
-//                 Console.WriteLine(error.Description);
-//             }
-//         }
-//     }
-//     else
-//     {
-//         if(!await userManager.IsInRoleAsync(adminUser, "Admin"))
-//         {
-//             await userManager.AddToRoleAsync(adminUser, "Admin");
-//         }
-//     }
-// }
+    if(adminUser == null)
+    {
+        adminUser = new User
+        {
+            UserName = builder.Configuration["Admin:Username"],
+            Email = builder.Configuration["Admin:Email"],
+        };
+        var result = await userManager.CreateAsync(
+            adminUser,
+            builder.Configuration["Admin:Password"]!
+        );
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+        else
+        {
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine(error.Description);
+            }
+        }
+    }
+    else
+    {
+        if(!await userManager.IsInRoleAsync(adminUser, "Admin"))
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+}
 
 app.UseRouting();
 
