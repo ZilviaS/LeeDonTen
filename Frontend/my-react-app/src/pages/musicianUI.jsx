@@ -157,7 +157,7 @@ function MusicianUi(){
     return(
         <>
             <section className='flex w-full justify-center pt-5 bg-neutral-800'>
-                <section className='w-[70%] min-h-screen'>
+                <section className='md:w-[70%] w-[90%] min-h-screen'>
                     <div className='flex justify-between bg-pink-300 p-2'>
                         <div>
                             <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>
@@ -183,8 +183,8 @@ function MusicianUi(){
                                     'text-green-500' }`}>{connectionStatus}</p>
                             </div>
                         </div>
-                        <div className="w-full flex justify-between px-10 h-100">
-                            <div className="w-[48%] bg-white border-gray-300 border-1 h-full overflow-y-scroll">
+                        <div className="w-full flex flex-col md:flex-row justify-between px-10 h-100">
+                            <div className="md:w-[48%] w-full bg-white border-gray-300 border-1 h-full overflow-y-scroll">
                                 {donation.map((item)=>(
                                     <div key={item.Id} className="w-full border-gray-300 border-1 px-3">
                                         <div className="flex gap-2 items-baseline">
@@ -207,7 +207,7 @@ function MusicianUi(){
 
                                 ))}
                             </div>
-                            <div className="w-[48%] h-full">
+                            <div className="md:w-[48%] w-full h-full">
                                 <div className="bg-white border-gray-300 border-1 h-[85%] overflow-y-scroll">
                                     {queue.map((item)=>(
                                         <div key={item.Id} className="w-full border-gray-300 border-1 px-3">

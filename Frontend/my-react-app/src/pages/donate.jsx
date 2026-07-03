@@ -116,7 +116,7 @@ function Donate(){
     return(
         <>
             <section className='flex w-full justify-center pt-5 bg-neutral-800'>
-                <section className='w-[70%] min-h-screen'>
+                <section className='md:w-[70%] w-[90%] min-h-screen'>
                     <div className='flex justify-between bg-pink-300 p-2'>
                         <div>
                             <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>

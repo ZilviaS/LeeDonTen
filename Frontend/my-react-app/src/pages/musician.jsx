@@ -102,7 +102,7 @@ function Musician(){
     return(
         <>
             <section className='flex w-full justify-center pt-5 bg-neutral-800'>
-                <section className='w-[70%] min-h-screen'>
+                <section className='md:w-[70%] w-[90%] min-h-screen'>
                     <div className='flex justify-between bg-pink-300 p-2'>
                         <div>
                             <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>
@@ -133,7 +133,7 @@ function Musician(){
                                         <a href="/musician/donation" className="text-center bg-green-500 hover:bg-green-700 hover:cursor-pointer rounded px-3 py-2 text-white">เปิดการ donate</a>
                                         <a href={`/user/${user.Username}/account`} className="text-center bg-red-500 hover:bg-red-700 hover:cursor-pointer px-3 py-2 text-white rounded">จัดการบัญชี</a>
                                         <a href={`/user/${user.Username}/history`} className="text-center bg-yellow-500 hover:bg-yellow-700 hover:cursor-pointer rounded px-3 py-2 text-white">ประวัติการ Donate</a>
-                                        <a href={`/user/${user.Username}/account`} className="text-center bg-blue-500 hover:bg-blue-700 hover:cursor-pointer px-3 py-2 text-white rounded" >วิธีการใช้งาน LeeDonTen</a>
+                                        <a href={`/musician/tutorial`} className="text-center bg-blue-500 hover:bg-blue-700 hover:cursor-pointer px-3 py-2 text-white rounded" >วิธีการใช้งาน LeeDonTen</a>
                                     </div>
                                 </div>
                             </div>

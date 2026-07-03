@@ -11,6 +11,7 @@ import MusicianUi from './pages/musicianUI'
 import DonateHistory from './pages/donateHistory'
 import Account from './pages/account'
 import AdminManage from './pages/admin'
+import Tutorial from './pages/tutorial'
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
         <Route path='/user/:Username/history' element={<DonateHistory/>}></Route>
         <Route path='/user/:Username/account' element={<Account/>}></Route>
         <Route path='/admin' element={<AdminManage/>}></Route>
+        <Route path='/musician/tutorial' element={<Tutorial/>}></Route>
       </Routes>
     </BrowserRouter>
   )
