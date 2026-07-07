@@ -33,18 +33,18 @@ function Login(){
 
     return(
         <>
-            <section className='flex w-full justify-center pt-5 bg-neutral-800'>
-                <section className='w-[70%] min-h-screen'>
-                    <div className='flex justify-between bg-pink-300 p-2'>
+            <section className='flex w-full justify-center pt-5 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900'>
+                <section className='md:w-[70%] w-90% min-h-screen'>
+                    <div className='flex justify-between bg-pink-300 p-2 rounded-t'>
                         <div>
                             <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>
                         </div>
                     </div>
-                    <div className='h-[80%] bg-white flex-col flex items-center'>
+                    <div className='h-[80%] bg-white flex-col flex items-center rounded-b'>
                         <div className='flex justify-center py-5'>
                             <p className='KoHo font-semibold text-xl'>เข้าสู่ระบบ (นักดนตรี)</p>
                         </div>
-                        <div className='w-full grid mb-2 gap-3 justify-center'>
+                        <div className='w-full grid mb-2 gap-3 justify-center px-1'>
                             <div className='w-full'>
                                 <p className='text-sm KoHo text-gray-500'>Username</p>
                                 <input onChange={(e)=>{setUserForm({...userForm, Username : e.target.value})}} type="text" className='px-1 w-full bg-gray-100 rounded border-1 border-gray-300'/>

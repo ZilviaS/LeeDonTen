@@ -58,7 +58,8 @@ function DonateHistory(){
         }
     }
 
-    const [ sortDesc, setSortDesc ] = useState('date')
+    const [ sortBy, setSortBy ] = useState('date')
+    const [sortOrder, setSortOrder] = useState("desc");
 
     const searchedList = donateInfo.filter((info)=>{
         const keyword = searchTerm.toLowerCase()
@@ -76,13 +77,18 @@ function DonateHistory(){
 
         return matchSearch && passUnpaidFilter
     }).sort((a,b) => {
-        if (sortDesc == 'date'){
-            return new Date(b.createdAt) - new Date(a.createdAt)
+        if (sortBy == 'date'){
+            return sortOrder === "desc"
+                ? new Date(b.createdAt) - new Date(a.createdAt)
+                : new Date(a.createdAt) - new Date(b.createdAt);
         }
         
-        if (sortDesc == 'amount'){
-            return b.amount - a.amount
+        if (sortBy == 'amount'){
+            return sortOrder === "desc"
+                ? b.amount - a.amount
+                : a.amount - b.amount;
         }
+        return 0;
 
     }
     )
@@ -217,47 +223,61 @@ function DonateHistory(){
 
     return(
         <>
-            <section className='flex w-full justify-center pt-5 bg-neutral-800'>
-                <section className='w-[85%] min-h-screen'>
-                    <div className='flex justify-between bg-pink-300 p-2'>
-                        <div>
-                            <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>
+            <section className='flex w-full justify-center pt-5 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900'>
+                <section className='w-[85%] min-h-screen rounded'>
+                    <div className='lg:h-[80%] bg-white flex-col flex items-center windows'>
+                        <div className='flex w-full justify-between windows-border bg-[#00007D] px-2'>
+                            <div>
+                                <a className="W-95 text-md py-1 text-white" href="/">LeeDonTen</a>
+                            </div>
                         </div>
-                    </div>
-                    <div className='h-[80%] bg-white flex-col flex items-center'>
                         <div className='flex justify-center py-5'>
                             <p className='KoHo font-semibold text-xl'>Donate History ({user.Username})</p>
                         </div>
-                        <div className="flex w-full justify-center px-3">
+                        <div className="flex w-full flex-col lg:flex-row justify-center px-3 gap-5">
                             <div className="">
-                                <div className="flex justify-between">
+                                <div className="flex justify-between mb-1">
                                     <div className="flex pb-1 gap-3 items-center">
-                                        <input onChange={(e)=>{setSearchTerm(e.target.value)}} value={searchTerm} type="text" className="bg-gray-100 border-1 border-gray-300 px-1 text-sm" placeholder="ค้นหา"/>
+                                        <input onChange={(e)=>{setSearchTerm(e.target.value)}} value={searchTerm} type="text" className="bg-gray-100 windows-search px-1 text-sm" placeholder="ค้นหา"/>
                                         <div className="flex gap-1">
                                             <input type="checkbox" defaultChecked checked={unpaidBlind} onChange={(e) => setUnpaidBlind(e.target.checked)}/>
                                             <p className="text-xs font-light">แสดงข้อมูลที่จ่ายไม่สำเร็จ</p>
                                         </div>
                                     </div>
-                                    <div className="pr-4 hover:cursor-pointer">
-                                        <div onClick={()=>exportToCSV()} className="flex gap-1 bg-gray-200 px-1 rounded">
+                                    <div className="px-1 windows-button hover:cursor-pointer">
+                                        <div onClick={()=>exportToCSV()} className="flex gap-1 px-1 items-center">
                                             <img className="w-4" src={downloadIcon} alt="" />
-                                            <p className="KoHo text-sm ">save to csv</p>
+                                            <p className="W-95 text-sm">save to csv</p>
                                         </div>
                                     </div>
                                     
                                     
                                 </div>
-                                <div className="h-100 rounded overflow-y-scroll w-180 bg-gray-100 border-gray-200">
+                                <div className="h-100 rounded overflow-y-scroll md:overflow-auto overflow-x-scroll w-full md:w-180 sm:w-130 bg-gray-100 border-gray-200">
                                     <table className="border-1 w-full ">
-                                        <thead className="bg-pink-300">
+                                        <thead className="bg-[#c0c0c0]">
                                             <tr>
                                                 <td className="px-2 border-1">Id</td>
                                                 <td className="px-2 border-1">ชื่อผู้โดเนท</td>
                                                 <td className="px-2 border-1">เพลง</td>
-                                                <td className="px-2 border-1"><button onClick={() => sortDesc!= 'amount' ? setSortDesc('amount') : setSortDesc('')} className="w-full text-left hover:cursor-pointer flex justify-between">จำนวน<img className={`w-3 ${sortDesc == 'amount' ? 'rotate-180' : ''} tracking-normal duration-100`} src={arrowheadIcon} alt="" /></button></td>
+                                                <td className="px-2 border-1 windows-button"><button onClick={() => {
+                                                        if (sortBy !== "amount") {
+                                                            setSortBy("amount");
+                                                            setSortOrder("desc");
+                                                        } else {
+                                                            setSortOrder(prev => prev === "desc" ? "asc" : "desc");
+                                                        }
+                                                    }} className="w-full text-left hover:cursor-pointer flex justify-between">จำนวน<img className={` w-3 ${sortBy == 'amount' ? 'rotate-180' : ''}`} src={arrowheadIcon} alt="" /></button></td>
                                                 <td className="px-2 border-1">ข้อความ</td>
                                                 <td className="px-2 border-1">สถานะ</td>
-                                                <td className="px-2 border-1"><button onClick={() => sortDesc!= 'date' ? setSortDesc('date') : setSortDesc('')} className="w-full text-left hover:cursor-pointer flex justify-between">วันที่<img className={`w-3 ${sortDesc == 'date' ? 'rotate-180' : ''} tracking-normal duration-100`} src={arrowheadIcon} alt="" /></button></td>
+                                                <td className="px-2 border-1 windows-button"><button onClick={() => {
+                                                    if (sortBy !== "date") {
+                                                        setSortBy("date");
+                                                        setSortOrder("desc");
+                                                    } else {
+                                                        setSortOrder(prev => prev === "desc" ? "asc" : "desc");
+                                                    }
+                                                }} className="w-full text-left hover:cursor-pointer flex justify-between">วันที่<img className={`w-3 ${sortBy == 'date' ? 'rotate-180' : ''} `} src={arrowheadIcon} alt="" /></button></td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -277,9 +297,9 @@ function DonateHistory(){
                                 </div>
                                 
                             </div>
-                            <div className="w-80">
+                            <div className="lg:w-80 w-full windows-in bg-white pr-5 py-2">
                                 <div>
-                                    <p className="w-full text-right text-xs text-gray-500 pr-1">ยอด Donate ต่อวัน</p>
+                                    <p className="w-full text-right text-xs text-gray-500 pr-1 ">ยอด Donate ต่อวัน</p>
                                     <ResponsiveContainer width="100%" height={200}>
                                         <LineChart data={dailyData}>
                                             <CartesianGrid strokeDasharray="3 3" />
@@ -317,7 +337,7 @@ function DonateHistory(){
                             
                         </div>
                         
-                        <div className='w-full flex justify-center gap-3 mb-3'>
+                        <div className='w-full flex justify-center gap-3 mb-3 mt-1'>
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/policy">นโยบายข้อมูลส่วนบุคคล</a>
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/terms">ข้อตกลงการใช้งาน</a>
                         </div>

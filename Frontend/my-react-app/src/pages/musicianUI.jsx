@@ -156,14 +156,14 @@ function MusicianUi(){
 
     return(
         <>
-            <section className='flex w-full justify-center pt-5 bg-neutral-800'>
-                <section className='md:w-[70%] w-[90%] min-h-screen'>
-                    <div className='flex justify-between bg-pink-300 p-2'>
-                        <div>
-                            <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>
+            <section className='flex w-full justify-center pt-5 bg-[#017C7E]'>
+                <section className='md:w-[70%] w-[90%] min-h-screen rounded'>
+                    <div className='h-[80%] bg-white flex-col flex items-center rounded-b windows'>
+                        <div className='flex w-full justify-between bg-[#00007D] px-2'>
+                            <div>
+                                <a className="W-95 text-md py-1 text-white" href="/">LeeDonTen</a>
+                            </div>
                         </div>
-                    </div>
-                    <div className='h-[80%] bg-white flex-col flex items-center'>
                         <div className='flex justify-center py-3'>
                             <p className='KoHo font-semibold text-xl'>หน้าต่าง Donate (นักดนตรี)</p>
                         </div>
@@ -172,19 +172,19 @@ function MusicianUi(){
                                 <button className={`toggle-btn ${onlineToggle ? "toggled" : ""}`} onClick={()=> handleDonationStatus()}>
                                     <div className="thumb"></div>
                                 </button>
-                                <p className={`text-xs ${onlineToggle? "text-green-500" : "text-gray-500"}`}>{onlineToggle? "เปิดรับ Donate" : "ปิดรับ Donate"}</p>
+                                <p className={`text-xs ${onlineToggle? "text-[#017C7E]" : "text-gray-500"}`}>{onlineToggle? "เปิดรับ Donate" : "ปิดรับ Donate"}</p>
                             </div>
-                            <div className="flex">
+                            <div className="flex W-95 gap-1">
                                 <p className="text-xs">status : </p>
                                 <p className={`text-xs ${
                                     connectionStatus === 'disconnected' ? 'text-yellow-500' :
                                     connectionStatus == 'reconnecting' ? 'text-yellow-500' :
                                     connectionStatus == 'disconnected' ? 'text-red-500' :
-                                    'text-green-500' }`}>{connectionStatus}</p>
+                                    'text-[#017C7E]' }`}>{connectionStatus}</p>
                             </div>
                         </div>
                         <div className="w-full flex flex-col md:flex-row justify-between px-10 h-100">
-                            <div className="md:w-[48%] w-full bg-white border-gray-300 border-1 h-full overflow-y-scroll">
+                            <div className="md:w-[48%] w-full bg-white  h-full overflow-y-scroll windows-in">
                                 {donation.map((item)=>(
                                     <div key={item.Id} className="w-full border-gray-300 border-1 px-3">
                                         <div className="flex gap-2 items-baseline">
@@ -200,15 +200,15 @@ function MusicianUi(){
                                             <p className="text-gray-500 text-sm text-wrap">{item.message}</p>
                                         </div>
                                         <div className="flex gap-2 mt-1 mb-2">
-                                            <button onClick={()=>handleAddQueue(item)} className="px-2 bg-green-500 rounded text-sm text-white">เข้าคิว</button>
-                                            <button onClick={()=>handleCancelRequest(item)} className="px-2 bg-red-500 rounded text-sm text-white">ยกเลิก</button>
+                                            <button onClick={()=>handleAddQueue(item)} className="px-2 bg-green-500 windows-button text-sm text-white">เข้าคิว</button>
+                                            <button onClick={()=>handleCancelRequest(item)} className="px-2 bg-red-500 text-sm windows-button text-white">ยกเลิก</button>
                                         </div>
                                     </div>
 
                                 ))}
                             </div>
                             <div className="md:w-[48%] w-full h-full">
-                                <div className="bg-white border-gray-300 border-1 h-[85%] overflow-y-scroll">
+                                <div className="bg-white border-gray-300 border-1 h-[85%] overflow-y-scroll windows-in">
                                     {queue.map((item)=>(
                                         <div key={item.Id} className="w-full border-gray-300 border-1 px-3">
                                             <div className="flex gap-2 items-baseline">
@@ -224,8 +224,8 @@ function MusicianUi(){
                                                 <p className="text-gray-500 text-sm">{item.message}</p>
                                             </div>
                                             <div className="flex gap-2 mt-1 mb-2">
-                                                <button onClick={()=>handlePlayRequest(item)} className="px-2 bg-green-500 rounded text-sm text-white">เล่น</button>
-                                                <button onClick={()=>handleCancelRequest(item)} className="px-2 bg-red-500 rounded text-sm text-white">ยกเลิก</button>
+                                                <button onClick={()=>handlePlayRequest(item)} className="px-2 bg-green-500 windows-button text-sm text-white">เล่น</button>
+                                                <button onClick={()=>handleCancelRequest(item)} className="px-2 bg-red-500 windows-button text-sm text-white">ยกเลิก</button>
                                             </div>
                                         </div>
                                     ))}
