@@ -114,7 +114,7 @@ function Account(){
     return(
         <>
             <section className='flex w-full justify-center pt-5 bg-[#017C7E]'>
-                <section className='w-[70%] min-h-screen'>
+                <section className='md:w-[70%] w-[90%] min-h-screen'>
                     <div className='h-[80%] bg-white flex-col flex items-center windows'>
                         <div className='flex w-full justify-between windows-border bg-[#00007D] px-2'>
                             <div>
@@ -126,13 +126,13 @@ function Account(){
                         </div>
                         <div className="">
                             <p className="text-sm text-gray-500 font-light my-1">ข้อมูลคำร้องขอถอนเงิน</p>
-                            <div className="flex gap-1 my-2">
+                            <div className="flex gap-1 my-2 md:flex-row flex-col md:px-0 px-2">
                                 <p className="text-sm">ขื่อ</p>
                                 <input onChange={(e)=>{setWithdrawRequets({...withdrawReqeust, Fname : e.target.value})}} value={withdrawReqeust.Fname} type="text" className="bg-gray-100 windows-search px-1 text-sm "/>
                                 <p className="text-sm">นามสกุล</p>
                                 <input onChange={(e)=>{setWithdrawRequets({...withdrawReqeust, Lname : e.target.value})}} value={withdrawReqeust.Lname} type="text" className="bg-gray-100 px-1 text-sm windows-search"/>
                             </div>
-                            <div className="flex gap-1 my-2">
+                            <div className="flex gap-1 my-2 md:flex-row flex-col md:px-0 px-2">
                                 <p className="text-sm">ธุรกรรม </p>
                                 <select value={withdrawReqeust.PaymentOption} onChange={(e)=>{setWithdrawRequets({...withdrawReqeust, PaymentOption : e.target.value})}} name="" id="" className="text-sm windows-search bg-gray-100 px-1 ">
                                     <option value="" className="text-gray-500">--เลือก--</option>
@@ -144,11 +144,11 @@ function Account(){
                                 </select>
                                 <input onChange={(e)=>{setWithdrawRequets({...withdrawReqeust, AccountNumber : e.target.value})}} type="text" className="bg-gray-100 text-sm text-light px-1 windows-search w-full" placeholder="เลขบัญชี/เลขพร้อมเพย์"/>
                             </div> 
-                            <div className="flex mt-2 gap-2">
+                            <div className="flex mt-2 gap-2 md:px-0 px-2 md:pt-0 pt-3">
                                 <p className="text-sm">ยอดการถอน</p>
                                 <input value={withdrawReqeust.Amount} onChange={(e)=>{setWithdrawRequets({...withdrawReqeust, Amount : e.target.value})}} type="number" className="bg-gray-100 windows-search text-sm px-1"/>
                             </div>
-                            <div className="flex items-baseline gap-2">
+                            <div className="flex items-baseline gap-2 md:px-0 px-2 md:pt-0 pt-3">
                                 <button onClick={handleWithdrawRequest} className="text-sm px-5 bg-yellow-500 windows-button hover:cursor-pointer">ถอน</button>
                                 <p className="text-xs text-red-500">{errorLog}</p>
                             </div>
@@ -156,7 +156,7 @@ function Account(){
                             
                         </div>
                         <p className="text-sm text-gray-600">ยอดเงินรวม : <span className="text-green-600">{balance}</span> บาท</p>
-                        <div className="mt-3 h-70 overflow-y-scroll bg-gray-100 w-200 windows-in">
+                        <div className="mt-3 h-70 overflow-y-scroll md:overflow-x-auto overflow-x-scroll bg-gray-100 lg:w-180 md:w-140 w-full windows-in">
                             <table className="w-full">
                                 <thead>
                                     <tr className="text-sm bg-[#c0c0c0]">

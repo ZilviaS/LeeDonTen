@@ -49,7 +49,7 @@ function Home(){
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/policy">นโยบายข้อมูลส่วนบุคคล</a>
                             <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/terms">ข้อตกลงการใช้งาน</a>
                         </div>
-                        <div className='bg-white w-[90%] h-50 px-2 shadow mt-3 windows-in W-95'>
+                        <div className='bg-white w-[90%] min-h-50 px-2 shadow mt-3 windows-in W-95'>
                             <p className=''>อะไรคือ LeeDonTen</p>
                             <div className='w-full h-0.5 bg-gray-300'></div>
                             <p className='text-sm my-1'>

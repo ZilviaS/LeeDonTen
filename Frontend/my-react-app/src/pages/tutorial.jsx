@@ -6,14 +6,14 @@ import tutorial_4 from "../assets/tutorial_4.png"
 function Tutorial(){
     return(
         <>
-        <section className='flex w-full justify-center pt-5 bg-neutral-800'>
+        <section className='flex w-full justify-center pt-5 bg-[#017C7E]'>
                 <section className='w-[70%] min-h-screen'>
-                    <div className='flex justify-between bg-pink-300 p-2'>
-                        <div>
-                            <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>
+                    <div className='bg-white flex-col flex items-center windows'>
+                        <div className='flex w-full justify-between bg-[#00007D] px-2'>
+                            <div>
+                                <a className="W-95 text-md py-1 text-white" href="/">LeeDonTen</a>
+                            </div>
                         </div>
-                    </div>
-                    <div className='bg-white flex-col flex items-center'>
                         <div className='flex justify-center py-5'>
                             <p className='KoHo font-semibold text-xl'>วิธีใช้งาน</p>
                         </div>

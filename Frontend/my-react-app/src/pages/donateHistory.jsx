@@ -223,7 +223,7 @@ function DonateHistory(){
 
     return(
         <>
-            <section className='flex w-full justify-center pt-5 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900'>
+            <section className='flex w-full justify-center pt-5 bg-[#017C7E]'>
                 <section className='w-[85%] min-h-screen rounded'>
                     <div className='lg:h-[80%] bg-white flex-col flex items-center windows'>
                         <div className='flex w-full justify-between windows-border bg-[#00007D] px-2'>
@@ -236,8 +236,8 @@ function DonateHistory(){
                         </div>
                         <div className="flex w-full flex-col lg:flex-row justify-center px-3 gap-5">
                             <div className="">
-                                <div className="flex justify-between mb-1">
-                                    <div className="flex pb-1 gap-3 items-center">
+                                <div className="flex justify-between mb-1 md:flex-row flex-col">
+                                    <div className="flex pb-1 gap-3 items-center ">
                                         <input onChange={(e)=>{setSearchTerm(e.target.value)}} value={searchTerm} type="text" className="bg-gray-100 windows-search px-1 text-sm" placeholder="ค้นหา"/>
                                         <div className="flex gap-1">
                                             <input type="checkbox" defaultChecked checked={unpaidBlind} onChange={(e) => setUnpaidBlind(e.target.checked)}/>
