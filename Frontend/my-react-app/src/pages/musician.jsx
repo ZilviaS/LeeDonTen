@@ -109,7 +109,7 @@ function Musician(){
                         <div className='h-[80%] windows flex flex-col bg-white rounded-b'>
                             <div className='flex w-full justify-between bg-[#00007D] px-2'>
                                 <div>
-                                    <a className="W-95 text-xl py-0.5 font-bold text-white" href="/">LeeDonTen</a>
+                                    <a className="W-95 text-md py-1 text-white" href="/">LeeDonTen</a>
                                 </div>
                             </div>
                             <div className="flex flex-col justify-between h-full gap-10 p-2">
