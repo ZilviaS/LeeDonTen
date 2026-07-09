@@ -74,6 +74,14 @@
   transform: translate(1px, 1px);
 }
 
+.windows-button-press{
+  border-top: 2px solid #555;
+  border-left: 2px solid #555;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: translate(1px, 1px);
+}
+
 .windows-border{
   border-top: 2px solid white;
   border-left: 2px solid white;
@@ -126,3 +134,4 @@
   border-right: 2px solid #555;
   border-right: 2px solid #555;
 }
+
