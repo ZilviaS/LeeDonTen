@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using LeeDonTen.Api.Service;
 using Microsoft.AspNetCore.Identity;
 using LeeDonTen.Api.Entities;
-using LeeDonTen.Api.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -161,8 +160,6 @@ app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapHub<DonationHub>("/donationHub");
 
 app.MapControllers();
 

@@ -1,7 +1,7 @@
-import * as signalR from "@microsoft/signalr"
 import { useEffect, useState } from "react"
 import { jwtDecode } from "jwt-decode"
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function MusicianUi(){
 
@@ -110,49 +110,46 @@ function MusicianUi(){
     },[])
 
     useEffect(()=>{
-        if (!user.UserId) return
-        console.log(signalR.VERSION)
-        const token = localStorage.getItem('token')
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${API}/donationHub`, {
-                accessTokenFactory: ()=> {
-                    console.log("sending token", token);
-                    return token}
-            })
-            .withAutomaticReconnect()
-            .build();
 
-        connection.onreconnected(()=>{
+        const eventSource = new EventSource(
+            `${API}/api/events`
+        );
+
+
+        eventSource.onopen = ()=>{
+            console.log("SSE Connected");
             setConnectionStatus("connected");
-        })
+        };
 
-        connection.onclose(()=>{
-            setConnectionStatus("disconnected")
-        })
 
-        async function start(){
-            try{
-                await connection.start()
-                console.log("SignalR Connected")
-                setConnectionStatus("connected")
+        eventSource.onmessage = (event)=>{
+            console.log("Raw:", event.data);
 
-                await connection.invoke("JoinGroup", user.UserId)
-
-            } catch(err){
-                console.log(err)
-                setConnectionStatus("disconnected")
+            if(event.data === "Connected"){
+                return;
             }
-        }
-        start()
 
-        connection.on("NewDonation", (data)=>{
-            console.log("New donation!", data);
-            setDonations(prev => [data, ...prev]);
-        })
+            const data = JSON.parse(event.data);
+            console.log("Donation:", data);
+            setDonations(prev => [
+                data,
+                ...prev
+            ]);
+        };
+
+
+        eventSource.onerror = (error)=>{
+            console.log("SSE Error", error);
+            setConnectionStatus("disconnected");
+        };
+
+
         return ()=>{
-            connection.stop();
+            console.log("Closing SSE connection");
+            eventSource.close();
         }
-    }, [user.UserId])
+
+    },[])
 
     return(
         <>
@@ -161,7 +158,7 @@ function MusicianUi(){
                     <div className='h-[80%] bg-white flex-col flex items-center rounded-b windows'>
                         <div className='flex w-full justify-between bg-[#00007D] px-2'>
                             <div>
-                                <a className="W-95 text-md py-1 text-white" href="/">LeeDonTen</a>
+                                <Link className="W-95 text-md py-1 text-white" to="/">LeeDonTen</Link>
                             </div>
                         </div>
                         <div className='flex justify-center py-3'>
@@ -186,7 +183,7 @@ function MusicianUi(){
                         <div className="w-full flex flex-col md:flex-row justify-between px-10 h-100">
                             <div className="md:w-[48%] w-full bg-white  h-full overflow-y-scroll windows-in">
                                 {donation.map((item)=>(
-                                    <div key={item.Id} className="w-full border-gray-300 border-1 px-3">
+                                    <div key={item.id} className="w-full border-gray-300 border-1 px-3">
                                         <div className="flex gap-2 items-baseline">
                                             <p className="KoHo">{item.donor}</p>
                                             <p className="text-pink-500 KoHo font-semibold">donate</p>
@@ -210,7 +207,7 @@ function MusicianUi(){
                             <div className="md:w-[48%] w-full h-full">
                                 <div className="bg-white border-gray-300 border-1 h-[85%] overflow-y-scroll windows-in">
                                     {queue.map((item)=>(
-                                        <div key={item.Id} className="w-full border-gray-300 border-1 px-3">
+                                        <div key={item.id} className="w-full border-gray-300 border-1 px-3">
                                             <div className="flex gap-2 items-baseline">
                                                 <p className="KoHo">{item.donor}</p>
                                                 <p className="text-pink-500 KoHo font-semibold">donate</p>
@@ -240,8 +237,8 @@ function MusicianUi(){
                             </div>
                         </div>
                         <div className='w-full flex justify-center gap-3 mb-3 mt-3'>
-                            <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/policy">นโยบายข้อมูลส่วนบุคคล</a>
-                            <a className='text-xs text-gray-500 hover:underline hover:cursor-pointer' href="/terms">ข้อตกลงการใช้งาน</a>
+                            <Link className='text-xs text-gray-500 hover:underline hover:cursor-pointer' to="/policy">นโยบายข้อมูลส่วนบุคคล</Link>
+                            <Link className='text-xs text-gray-500 hover:underline hover:cursor-pointer' to="/terms">ข้อตกลงการใช้งาน</Link>
                         </div>
                     </div>
                 </section>

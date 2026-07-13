@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.AspNetCore.SignalR;
-using LeeDonTen.Api.Hubs;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
@@ -23,15 +22,15 @@ public class DonateController : ControllerBase
 {
     private readonly AppDbContext context;
     private readonly UserManager<User> userManager;
-    private readonly IHubContext<DonationHub> hubContext;
+    // private readonly IHubContext<DonationHub> hubContext;
     private readonly HttpClient _httpClient;
     private readonly IConfiguration configuration;
 
-    public DonateController(AppDbContext context, UserManager<User> userManager, IHubContext<DonationHub> hubContext, IHttpClientFactory factory, IConfiguration configuration)
+    public DonateController(AppDbContext context, UserManager<User> userManager, IHttpClientFactory factory, IConfiguration configuration)
     {
         this.context = context;
         this.userManager = userManager;
-        this.hubContext = hubContext;
+        // this.hubContext = hubContext;
         _httpClient = factory.CreateClient();
         this.configuration = configuration;
     }

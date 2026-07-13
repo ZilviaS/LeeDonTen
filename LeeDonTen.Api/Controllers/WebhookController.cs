@@ -1,7 +1,6 @@
 using LeeDonTen.Api.Data;
 using LeeDonTen.Api.Dtos;
 using LeeDonTen.Api.Entities;
-using LeeDonTen.Api.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +12,9 @@ namespace LeeDonTen.Api.Controllers;
 public class WebhookController : ControllerBase
 {
     private readonly AppDbContext context;
-    private readonly IHubContext<DonationHub> hubContext;
-    public WebhookController(AppDbContext context, IHubContext<DonationHub> hubContext)
+    public WebhookController(AppDbContext context)
     {
         this.context = context;
-        this.hubContext = hubContext;
     }
     [HttpPost("payment")]
     public async Task<IActionResult> Payment(PaymentDto dto)
@@ -73,16 +70,14 @@ public class WebhookController : ControllerBase
             if(dto.Status == 1)
             {
                 Console.WriteLine($"SEND TO GROUP : {request.UserId}");
-
-                await hubContext.Clients.Group(request.UserId)
-                    .SendAsync("NewDonation", new
-                    {
+                await EventsController.SendEvent(new
+                {
                         id = request.Id,
                         donor = request.DonorName,
                         song = request.SongName,
                         amount = request.Amount,
                         message = request.Message
-                    });
+                });
             }
             return Ok();
         }
