@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { jwtDecode } from "jwt-decode"
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 function MusicianUi(){
 
@@ -110,46 +111,61 @@ function MusicianUi(){
     },[])
 
     useEffect(()=>{
+        const controller = new AbortController()
+        
+        const token = localStorage.getItem("token")
 
-        const eventSource = new EventSource(
-            `${API}/api/events`
-        );
+        fetchEventSource(`${API}/api/events`,{
+            method : 'GET',
 
+            headers: {
+                Authorization : `Bearer ${token}`,
+                Accept : "text/event-stream"
+            },
 
-        eventSource.onopen = ()=>{
-            console.log("SSE Connected");
-            setConnectionStatus("connected");
-        };
+            signal : controller.signal,
 
+            onopen(res){
+                if (res.ok){
+                    console.log("SSE Connected")
+                    setConnectionStatus("connected")
+                }else{
+                    throw new Error(
+                        `SSE failed: ${res.status}`
+                    )
+                }
+            },
 
-        eventSource.onmessage = (event)=>{
-            console.log("Raw:", event.data);
+            onmessage(event) {
+                if(event.data == 'Connected'){
+                    return ;
+                }
 
-            if(event.data === "Connected"){
-                return;
+                const data = JSON.parse(event.data)
+
+                setDonations(prev =>[
+                    data,
+                    ...prev
+                ])
+                
+                console.log(data)
+
+            },
+            
+            onerror(err) {
+                console.log("SSE closed : ",err )
+                setConnectionStatus("disconnected")
+
+                throw err;
             }
-
-            const data = JSON.parse(event.data);
-            console.log("Donation:", data);
-            setDonations(prev => [
-                data,
-                ...prev
-            ]);
-        };
-
-
-        eventSource.onerror = (error)=>{
-            console.log("SSE Error", error);
-            setConnectionStatus("disconnected");
-        };
-
-
-        return ()=>{
-            console.log("Closing SSE connection");
-            eventSource.close();
+        })
+        return () => {
+            console.log("Disconnect SSE");
+            controller.abort();
         }
+    }, [])
 
-    },[])
+
 
     return(
         <>

@@ -124,6 +124,7 @@ function Musician(){
                                     </div>
                                     <div className="flex items-baseline gap-2">
                                         <p className="KoHo">สวัสดีคุณ,</p>
+                                        {/* <a href={`/user/${user.Username}`} className="W-95 text-2xl hover:underline hover:cursor-pointer">{user.Username}</a> */}
                                         <p className="W-95 text-2xl">{user.Username}</p>
                                         <button onClick={handleLogout} className="underline W-95 text-sm hover:cursor-pointer hover:text-red-600">logout</button>
                                     </div>

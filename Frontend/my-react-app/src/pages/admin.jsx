@@ -11,6 +11,10 @@ function AdminManage(){
 
     const [ errorLog, setErrorLog ] = useState('')
 
+    const [ showRejectModel, setShowRejectModel ] = useState(false)
+    const [ selectedRequestId, setSelectedRequestId ] = useState(null);
+    const [ remark, setRemark ] = useState("")
+
     const handleLogout = ()=>{
         localStorage.removeItem('token')
         navigate('/')
@@ -79,6 +83,27 @@ function AdminManage(){
         }
     }
 
+    const RequestDeniedHandle = async(Id,remark)=>{
+        const token = localStorage.getItem("token")
+        const res = await fetch(`${API}/api/withdraw/${Id}/reject`,{
+            method : 'POST',
+            headers : {
+                'Authorization' : `Bearer ${token}`,
+                'content-type' : 'application/json'
+            },
+            body : JSON.stringify(remark)
+        })
+
+        if (res.ok){
+            window.location.reload()
+        }else{
+            const data = await res.json()
+            console.log(data)
+            setErrorLog(data.message)
+        }
+
+    }
+
     useEffect(()=>{
         const handleRequest = async ()=>{
             const token = localStorage.getItem("token")
@@ -99,17 +124,17 @@ function AdminManage(){
 
     return (
         <>
-            <section className='flex w-full justify-center pt-5 bg-neutral-800'>
+            <section className='flex w-full justify-center pt-5 bg-[#017C7E]'>
                 <section className='w-[70%] min-h-screen'>
-                    <div className='flex justify-between bg-pink-300 p-2 items-center'>
-                        <div>
-                            <a className="KoHo text-2xl font-bold text-pink-700" href="/">LeeDonTen</a>
+                    <div className='h-[80%] bg-white flex-col flex items-center windows'>
+                        <div className='flex justify-between windows-border bg-[#00007D] px-2 items-center w-full'>
+                            <div>
+                                <a className="KoHo text-2xl font-bold text-white" href="/">LeeDonTen</a>
+                            </div>
+                            <div>
+                                <button onClick={handleLogout} className="items-baseline text-sm text-white hover:underline hover:cursor-pointer">ลงชื่อออก</button>
+                            </div>
                         </div>
-                        <div>
-                            <button onClick={handleLogout} className="items-baseline text-sm text-red-900 hover:cursor-pointer">ลงชื่อออก</button>
-                        </div>
-                    </div>
-                    <div className='h-[80%] bg-white flex-col flex items-center'>
                         <div className='flex justify-center py-5'>
                             <p className='KoHo font-semibold text-xl'>ระบบจัดการ Request (Admin)</p>
                         </div>
@@ -144,8 +169,11 @@ function AdminManage(){
                                                 <td className="text-right bg-white border-1 px-1 text-sm">
                                                     {item.status == 0 ? <>
                                                         <div className="flex gap-2">
-                                                            <button onClick={()=>{RequestGrantedHandle(item.id)}} className="bg-green-500 text-sm text-white rounded px-1 my-1 hover:cursor-pointer">อนุมัติ</button>
-                                                            <button className="bg-red-500 text-sm text-white rounded px-1 my-1 hover:cursor-pointer">ปฏิเสธ</button>
+                                                            <button onClick={()=>{RequestGrantedHandle(item.id)}} className="bg-green-500 text-sm text-white px-1 my-1 windows-button">อนุมัติ</button>
+                                                            <button onClick={()=>{
+                                                                setSelectedRequestId(item.id)
+                                                                setShowRejectModel(true)
+                                                            }} className="bg-red-500 text-sm text-white px-1 my-1 windows-button">ปฏิเสธ</button>
                                                         </div> 
                                                     </> : <></>}
 
@@ -167,6 +195,37 @@ function AdminManage(){
                     </div>
                 </section>
             </section>
+            {showRejectModel && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white w-[350px] windows border">
+                            <div className="bg-[#00007D] text-white px-2 flex justify-between items-center">
+                                <p className="KoHo font-bold">Reject Request</p>
+                                <button onClick={()=>{setShowRejectModel(false) }} className="text-white windows-button px-1 h-7 bg-red-500"> ✕ </button>
+                            </div>
+                            <div className="p-4">
+                                <p className="KoHo mb-2 text-sm font-semibold"> เหตุผลที่ปฏิเสธ </p>
+                                <textarea className="border w-full h-24 p-2 text-sm windows-search" value={remark} onChange={(e)=>setRemark(e.target.value)} placeholder="กรอกเหตุผล..."/>
+                                <div className="flex justify-end gap-2 mt-3">
+                                    <button className="windows-button px-3" onClick={()=>{
+                                            setShowRejectModel(false);
+                                            setRemark("");
+                                        }}>
+                                        ยกเลิก
+                                    </button>
+                                    <button className=" px-3 windows-button" onClick={()=>{
+                                        RequestDeniedHandle(selectedRequestId,{remark: remark});
+                                        setShowRejectModel(false);
+                                        setRemark("");
+                                    }}> ยืนยัน</button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+            )}
         </>
     )
 }

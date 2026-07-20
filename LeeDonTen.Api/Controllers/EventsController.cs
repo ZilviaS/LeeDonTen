@@ -1,21 +1,42 @@
+using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/events")]
 public class EventsController : ControllerBase
 {
-    private static List<StreamWriter> clients = new();
+    private static List<SseClient> clients = new();
 
+    private readonly ILogger<EventsController> logger;
+    private readonly SseService sseService;
+
+    public EventsController(ILogger<EventsController> logger, SseService sseService)
+    {
+        this.logger = logger;
+        this.sseService = sseService;
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet]
     public async Task Get()
     {
         Response.Headers["Content-Type"] = "text/event-stream";
         Response.Headers["Cache-Control"] = "no-cache";
+        Response.Headers["Connection"] = "keep-alive";
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         var writer = new StreamWriter(Response.Body);
 
-        clients.Add(writer);
+        var client = new SseClient{
+            UserId = userId!, 
+            Writer = writer};
+        clients.Add(client);
+        sseService.AddClient(client);
+        logger.LogInformation("SSE client connected.");
 
 
         await writer.WriteAsync(
@@ -26,43 +47,30 @@ public class EventsController : ControllerBase
 
         try
         {
-            while(!HttpContext.RequestAborted.IsCancellationRequested)
+            while(true)
             {
-                await Task.Delay(1000);
+                if(HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                    logger.LogInformation("Request aborted detected");
+                    break;
+                }
+
+                logger.LogInformation("SSE alive");
+
+                await Task.Delay(5000);
             }
+        }
+        catch(Exception ex)
+        {
+            logger.LogError(ex, "SSE loop error");
         }
         finally
         {
-            Console.WriteLine("disconnected");
-            clients.Remove(writer);
+            sseService.RemoveClient(client);
+
+            logger.LogInformation(
+                "SSE client disconnected.");
         }
     }
 
-    [HttpGet("send")]
-    public static async Task SendEvent(object data)
-    {
-        var json = JsonSerializer.Serialize(data);
-        foreach(var client in clients)
-        {
-            await client.WriteAsync(
-                $"data: {json}\n\n"
-            );
-
-            await client.FlushAsync();
-        }
-    }
-
-
-    [HttpGet("send/test")]
-    public async Task SendTest()
-    {
-        foreach(var client in clients)
-        {
-            await client.WriteAsync(
-                "data: Hello From Server\n\n"
-            );
-
-            await client.FlushAsync();
-        }
-    }
 }

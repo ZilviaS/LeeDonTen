@@ -18,10 +18,12 @@ public class WithdrawController : ControllerBase
 {
     private readonly AppDbContext context;   
     private readonly IUserBalanceService balanceService;
+    private readonly ILogger<WithdrawController> logger;
 
-    public WithdrawController(AppDbContext context, IUserBalanceService balanceService){
+    public WithdrawController(AppDbContext context, IUserBalanceService balanceService, ILogger<WithdrawController> logger){
         this.context = context;
-        this.balanceService = balanceService;;
+        this.balanceService = balanceService;
+        this.logger = logger;
     }
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -29,15 +31,17 @@ public class WithdrawController : ControllerBase
     public IActionResult GetWithdrawInfo()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
+                
         if (userId == null)
         {
             return Unauthorized();
         }
 
         var withdraw = context.Withdraws.Where(withdraw => withdraw.UserId == userId).ToList();
+
+         logger.LogInformation("User {userId} request withdraw info", userId);
         
-        return Ok(withdraw);
+        return Ok(withdraw); 
     }
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -45,6 +49,7 @@ public class WithdrawController : ControllerBase
     public async Task<IActionResult> RequestWithdraw(WithdrawRequestDto dto) 
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         if (userId == null)
         {
             return Unauthorized();
@@ -54,7 +59,7 @@ public class WithdrawController : ControllerBase
         {
             return Unauthorized();
         }
-        Console.WriteLine(dto.FName + ' ' + dto.LName + ' ' + dto.PaymentOption + ' ' + dto.AccountNumber + ' ' + dto.Amount);
+        
         if(string.IsNullOrEmpty(dto.FName) || string.IsNullOrEmpty(dto.LName) || string.IsNullOrEmpty(dto.PaymentOption) || string.IsNullOrEmpty(dto.AccountNumber) || dto.Amount == 0)
         {
             return BadRequest(new
@@ -63,8 +68,10 @@ public class WithdrawController : ControllerBase
             });
         }
 
+        logger.LogInformation("Withdraw request for user {userId}, {paymentOption} by {dto.FName} {dto.LName} for {amount} thb",
+            userId, dto.PaymentOption, dto.FName, dto.LName, dto.Amount);
+
         var balance = await balanceService.GetBalanceAsync(userId);
-        Console.WriteLine(balance);
         if(dto.Amount > balance)
         {
             return BadRequest(new
@@ -89,23 +96,33 @@ public class WithdrawController : ControllerBase
                 message = "payment option is not supported"
             });
         }
-
-        var withdraw = new Withdraws
+        try
         {
-            UserId = userId,
-            AccountName = dto.FName + " " + dto.LName,
-            PaymentOption = paymentOption.Value,
-            AccountNumber = dto.AccountNumber,
-            Amount = dto.Amount,
-            Status = WithdrawStatus.Pending
-        };
-        context.Withdraws.Add(withdraw);
-        context.SaveChanges();
+            var withdraw = new Withdraws
+            {
+                UserId = userId,
+                AccountName = dto.FName + " " + dto.LName,
+                PaymentOption = paymentOption.Value,
+                AccountNumber = dto.AccountNumber,
+                Amount = dto.Amount,
+                Status = WithdrawStatus.Pending
+            };
+            context.Withdraws.Add(withdraw);
+            context.SaveChanges();
 
-        return Ok(new
+            return Ok(new
+            {
+                message = "withdraw request successfully"
+            });
+        }
+        catch (Exception ex)
         {
-            message = "withdraw request successfully"
-        });
+            logger.LogError(ex, "Error, withdraw request fail for {userId}, {paymentOption} by {dto.FName} {dto.LName} for {amount} thb",
+                userId, dto.PaymentOption, dto.FName, dto.LName, dto.Amount);
+
+            return StatusCode(500,ex.Message);
+        }
+        
     }
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
@@ -130,6 +147,7 @@ public class WithdrawController : ControllerBase
     [HttpPost("{Id}/success")]
     public async Task<IActionResult> RequestGranted(int Id)
     {
+        logger.LogInformation("Admin granted request : {Id}", Id);
         var withdraw = await context.Withdraws.FirstOrDefaultAsync(d => d.Id == Id);
         if (withdraw == null)
         {
@@ -164,10 +182,12 @@ public class WithdrawController : ControllerBase
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
 
+            logger.LogInformation("requets {id} granted", Id);
             return Ok();
         }catch(Exception ex)
         {
             await transaction.RollbackAsync();
+            logger.LogError(ex, "Error, cannot granted the withdraw request no {id}", Id);
             return StatusCode(500, ex.Message);
         }
     }
@@ -176,15 +196,18 @@ public class WithdrawController : ControllerBase
     [HttpPost("{Id}/reject")]
     public async Task<IActionResult> RequestDenied(int Id, DeniedRequestDTO dto )
     {
+        logger.LogInformation("Admin reject request : {Id}", Id);
         var withdraw = await context.Withdraws.FirstOrDefaultAsync(data => data.Id == Id);
         if(withdraw == null)
         {
-            return NotFound();
+            logger.LogWarning("Withdraw Request {id} not found", Id);
+            return NotFound(new {message = "error, withdraw request not found"});
         }
 
         if(withdraw.Status != WithdrawStatus.Pending)
         {
-            return BadRequest();
+            logger.LogWarning("Withdraw status already sort out");
+            return BadRequest(new {message = "error, withdraw status already sort out"});
         }
         using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -194,12 +217,14 @@ public class WithdrawController : ControllerBase
             withdraw.ProcessAt = DateTime.UtcNow;
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
+            logger.LogInformation("requets {id} rejected", Id);
             return Ok();
-        }catch(Exception err)
+        }catch(Exception ex)
         {
             await transaction.RollbackAsync();
+            logger.LogError(ex, "Error, cannot reject the withdraw request no {id}", Id);
             return StatusCode(500, new{
-                message = err.Message});
+                message = ex.Message});
         }
     }
 

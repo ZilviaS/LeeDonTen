@@ -19,7 +19,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -84,6 +83,7 @@ builder.Services
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
+builder.Services.AddSingleton<SseService>();
 
 builder.Services.AddHostedService<PaymentTimeoutService>();
 

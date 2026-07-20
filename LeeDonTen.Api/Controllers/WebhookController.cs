@@ -12,20 +12,25 @@ namespace LeeDonTen.Api.Controllers;
 public class WebhookController : ControllerBase
 {
     private readonly AppDbContext context;
-    public WebhookController(AppDbContext context)
+    private readonly ILogger<WebhookController> logger;
+    private readonly SseService sseService;
+    public WebhookController(AppDbContext context, ILogger<WebhookController> logger, SseService sseService)
     {
         this.context = context;
+        this.logger = logger;
+        this.sseService = sseService;
     }
     [HttpPost("payment")]
     public async Task<IActionResult> Payment(PaymentDto dto)
     {
-        Console.WriteLine("Webhook Received");
-        
-        Console.WriteLine(dto.PaymentReference);
-        Console.WriteLine(dto.Status);
 
+        logger.LogInformation("WebHook Received for {PaymentReference} : Status {Status}",
+            dto.PaymentReference, dto.Status);
+        
         if(dto.Status is not (0 or 1))
         {
+            logger.LogWarning("WebHook Status is for {PaymentReference} : Status not (0,1) {Status}",
+                dto.PaymentReference, dto.Status);
             return BadRequest();
         }
 
@@ -69,21 +74,25 @@ public class WebhookController : ControllerBase
 
             if(dto.Status == 1)
             {
-                Console.WriteLine($"SEND TO GROUP : {request.UserId}");
-                await EventsController.SendEvent(new
+                var messageRequestsObject = new
                 {
                         id = request.Id,
                         donor = request.DonorName,
                         song = request.SongName,
                         amount = request.Amount,
                         message = request.Message
-                });
+                };
+                await sseService.SendEvent(request.UserId,messageRequestsObject);
             }
+            logger.LogInformation("payment : {PaymentReference},Status {Status} has been updated",
+                dto.PaymentReference, dto.Status);
             return Ok();
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
+            logger.LogError(ex,"Error, Webhook for payment : {PaymentReference} Status {Status}",
+                dto.PaymentReference, dto.Status);
             return StatusCode(500, ex.Message);
         }
     }

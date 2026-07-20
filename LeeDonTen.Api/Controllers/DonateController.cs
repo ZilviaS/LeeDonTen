@@ -25,14 +25,15 @@ public class DonateController : ControllerBase
     // private readonly IHubContext<DonationHub> hubContext;
     private readonly HttpClient _httpClient;
     private readonly IConfiguration configuration;
+    private readonly ILogger<DonateController> logger;
 
-    public DonateController(AppDbContext context, UserManager<User> userManager, IHttpClientFactory factory, IConfiguration configuration)
+    public DonateController(AppDbContext context, UserManager<User> userManager, IHttpClientFactory factory, IConfiguration configuration, ILogger<DonateController> logger)
     {
         this.context = context;
         this.userManager = userManager;
-        // this.hubContext = hubContext;
         _httpClient = factory.CreateClient();
         this.configuration = configuration;
+        this.logger = logger;
     }
 
     [HttpPost]
@@ -44,6 +45,7 @@ public class DonateController : ControllerBase
 
         if (user is null)
         {
+            logger.LogWarning("Donation failed. User {UserId} not found.", dto.UserId);
             return NotFound(new
             {
                 message = "error, user not found"
@@ -52,6 +54,7 @@ public class DonateController : ControllerBase
 
         if (user.IsOpenDonations == false)
         {
+            logger.LogWarning("Conflict User {userId} not open donation right now", dto.UserId);
             return Conflict(new
             {
                 message = "Sorry, User is not open donation right now"
@@ -60,6 +63,11 @@ public class DonateController : ControllerBase
 
         if (string.IsNullOrEmpty(dto.DonorName) || string.IsNullOrEmpty(dto.SongName) || dto.Amount == 0 )
         {
+            logger.LogWarning(
+                "Invalid donation request. UserId={UserId}, Donor={DonorName}, Amount={Amount}",
+                dto.UserId,
+                dto.DonorName,
+                dto.Amount);
             return BadRequest(new
             {
                 message = "error, please fill all the information"
@@ -97,19 +105,30 @@ public class DonateController : ControllerBase
 
             await transaction.CommitAsync();
 
-            Console.WriteLine($"PaymentPath = {paymentPath}");
+            var paymentURL = $"{paymentPath}/{payment.PaymentReference}";
+
+            logger.LogInformation("Donation created. RequestId={RequestId}, UserId={UserId}, PaymentReference={PaymentURL}",
+                request.Id, user.Id, paymentURL);
+
 
             return Ok(new
             {
                 Reference = payment.PaymentReference,
-                PaymentUrl = $"{paymentPath}/{payment.PaymentReference}"
+                PaymentUrl = paymentURL
             });
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
+            logger.LogError(
+                ex,
+                "Failed to create donation. UserId={UserId}, Donor={DonorName}, Amount={Amount}, Song={SongName}",
+                dto.UserId,
+                dto.DonorName,
+                dto.Amount,
+                dto.SongName);
             return StatusCode(500, new {
-                message = ex.Message});
+                message = "Internal Server Error"});
         }
     }
     [HttpGet("status/{reference}")]
@@ -118,9 +137,14 @@ public class DonateController : ControllerBase
         var payment = await context.Payments
             .FirstOrDefaultAsync(x => x.PaymentReference == reference);
 
-        if (payment == null)
+        if (payment == null){
+            logger.LogWarning("Reference : {reference}, not found", reference);
             return NotFound();
+        }
 
+        logger.LogDebug(
+            "Looking up payment {PaymentReference}",
+            reference);
         return Ok(new
         {
             status = payment.Status
@@ -133,6 +157,7 @@ public class DonateController : ControllerBase
         var request = context.Requests.FirstOrDefault(r => r.Id == requestId);
         if (request == null)
         {
+            logger.LogWarning("request {reqeustId} cancellation failed.", requestId);
             return BadRequest(new
             {
                 message = "request not found"
@@ -140,14 +165,17 @@ public class DonateController : ControllerBase
         }
         if (request.Status == Status.Cancelled)
         {
+            logger.LogWarning("request {requestId} already cancelled", requestId);
             return Ok(new
             {
                 message = "request already cancelled"
             });
         }
+        
         request.Status = Status.Cancelled;
 
         context.SaveChanges();
+        logger.LogInformation("request {requestId} cancelled successfully", requestId);
 
         return Ok(new
         {
@@ -161,13 +189,15 @@ public class DonateController : ControllerBase
         var request = context.Requests.FirstOrDefault(r => r.Id == requestId);
         if (request == null)
         {
-            return BadRequest(new
+            logger.LogWarning("Donation failed. Request {requestId} not found.", requestId);
+            return NotFound(new
             {
                 message = "request not found"
             });
         }
         if (request.Status == Status.Completed)
         {
+            logger.LogWarning("request {requestId} already completed", requestId);
             return Ok(new
             {
                 message = "request already played"
@@ -176,6 +206,8 @@ public class DonateController : ControllerBase
         request.Status = Status.Completed;
 
         context.SaveChanges();
+
+        logger.LogInformation("request {requestId} completed", requestId);
 
         return Ok(new
         {
@@ -191,12 +223,15 @@ public class DonateController : ControllerBase
 
         if (userId == null)
         {
+            logger.LogWarning("Donation failed. User {UserId} not found.", userId);
             return Unauthorized();
         }
 
         var data = context.Requests
             .Where(data=> data.UserId == userId)
             .ToList();
+        
+        logger.LogInformation("User {userId} requested donation information", userId);
 
         return Ok(data);
     }
