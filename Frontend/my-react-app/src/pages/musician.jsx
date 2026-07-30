@@ -52,6 +52,7 @@ function Musician(){
             })
             if(!res.ok){
                 navigate('/login')
+                return;
             }
             const data = await res.json()
             console.log(data)
