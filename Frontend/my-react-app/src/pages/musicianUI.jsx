@@ -78,27 +78,27 @@ function MusicianUi(){
     }
 
     useEffect(()=>{
-        const token = localStorage.getItem('token')
-        if (!token){
-            navigate('/login')
-        }else{
-            try{
-                const decode = jwtDecode(token)
-                console.log(decode)
-                setUser({
-                    Username : decode["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-                    UserId : decode["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
-                })
-            }catch{
-                console.log('error token missing')
+        const handleUser = async ()=>{
+            const res = await fetch(`${API}/api/user/me`,{
+                credentials : "include"
+            })
+
+            if (!res.ok){
+                navigate('/login')
             }
+
+            const data = await res.json()
+            console.log(data)
+            setUser({
+                Username : data.username,
+                UserId : data.userId
+            })
+
         }
         const getConnectionStatus = async()=>{
             const res = await fetch(`${API}/api/user/donation`,{
                 method : 'GET',
-                headers : {
-                    'Authorization' : `Bearer ${token}`
-                }
+                credentials : 'include'
             })
             const data = await res.json()
             if (!res.ok){
@@ -107,24 +107,21 @@ function MusicianUi(){
                 setOnlineToggle(data.isOpenDonation)
             }
         }
+
+        handleUser()
         getConnectionStatus()
     },[])
 
     useEffect(()=>{
         const controller = new AbortController()
-        
-        const token = localStorage.getItem("token")
 
         fetchEventSource(`${API}/api/events`,{
             method : 'GET',
-
+            credentials : "include",
             headers: {
-                Authorization : `Bearer ${token}`,
                 Accept : "text/event-stream"
             },
-
             signal : controller.signal,
-
             onopen(res){
                 if (res.ok){
                     console.log("SSE Connected")

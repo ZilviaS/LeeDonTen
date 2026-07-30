@@ -47,7 +47,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             OnAuthenticationFailed = context =>
             {
                 // Console.WriteLine("AUTH FAILED");
-                // Console.WriteLine(context.Exception.Message);
+                Console.WriteLine(context.Exception.Message);
                 return Task.CompletedTask;
             },
 
@@ -58,26 +58,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             },
             OnMessageReceived = context =>
             {
-                var accessToken = context.Request.Query["access_token"];
-
-                // Console.WriteLine($"TOKEN RECEIVED: {accessToken}");
-
-                var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) &&
-                    path.StartsWithSegments("/donationHub"))
-                {
-                    context.Token = accessToken;
-                }
-
+                context.Token = context.Request.Cookies["token"];
                 return Task.CompletedTask;
             }
+            // OnMessageReceived = context =>
+            // {
+            //     var accessToken = context.Request.Query["access_token"];
+
+            //     // Console.WriteLine($"TOKEN RECEIVED: {accessToken}");
+
+            //     var path = context.HttpContext.Request.Path;
+            //     if (!string.IsNullOrEmpty(accessToken) &&
+            //         path.StartsWithSegments("/donationHub"))
+            //     {
+            //         context.Token = accessToken;
+            //     }
+
+            //     return Task.CompletedTask;
+            // }
 
         };
     });
 builder.Services.AddAuthorization();
 
 builder.Services
-    .AddIdentity<User, IdentityRole>()
+    .AddIdentity<User, IdentityRole>(options => {})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -86,6 +91,20 @@ builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
 builder.Services.AddSingleton<SseService>();
 
 builder.Services.AddHostedService<PaymentTimeoutService>();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
+});
 
 var frontendUrl = builder.Configuration["Frontend:Url"]!;
 

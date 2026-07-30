@@ -121,9 +121,32 @@ public class UserController : ControllerBase
 
         logger.LogInformation("User {Username} logged in", dto.Username);
         var token = await jwtService.GenerateToken(user);
+
+        Response.Cookies.Append("token",token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddDays(7)
+        });
+        return Ok();
+    }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("token");
+        return Ok();
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
         return Ok(new
         {
-            token
+            Username = User.FindFirst(ClaimTypes.Name)?.Value,
+            UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
         });
     }
 

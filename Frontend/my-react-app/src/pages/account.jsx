@@ -50,7 +50,6 @@ function Account(){
 
     const handleWithdrawRequest = async()=>{
         console.log(withdrawReqeust)
-        const token = localStorage.getItem("token")
         console.log(withdrawReqeust.Amount)
         console.log(balance)
         if (withdrawReqeust.Amount > balance){
@@ -60,8 +59,8 @@ function Account(){
                 method : 'POST',
                 headers : {
                     'Content-Type' : 'application/json',
-                    'Authorization' : `Bearer ${token}`
                 },
+                credentials : "include",
                 body : JSON.stringify(withdrawReqeust)
             })
             const data = await res.json()
@@ -76,15 +75,21 @@ function Account(){
     }
 
     useEffect(()=>{
-        const token = localStorage.getItem("token")
-        if (!token){
-            navigate('/login')
+        const getUser = async ()=>{
+            const res = await fetch(`${API}/api/user/me`,{
+                credentials : 'include'
+            })
+            if(!res.ok){
+                navigate('/login')
+            }
+            const data = await res.json()
+            console.log(data)
         }
+        getUser()
+
         const handleAmount = async()=>{
             const res = await fetch(`${API}/api/user/balance`,{
-                headers:{
-                    'Authorization' : `Bearer ${token}`
-                }})
+                credentials : "include"})
             const data = await res.json()
             if(!res.ok){
                 console.log(data.message)
@@ -94,9 +99,7 @@ function Account(){
         }
         const handleWithdrawInfo = async()=>{
             const res = await fetch(`${API}/api/withdraw/user`,{
-                headers : {
-                    'Authorization' : `Bearer ${token}`
-                }
+                credentials : "include"
             })
             const data = await res.json()
             if(res.ok){

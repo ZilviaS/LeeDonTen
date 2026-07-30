@@ -15,9 +15,15 @@ function AdminManage(){
     const [ selectedRequestId, setSelectedRequestId ] = useState(null);
     const [ remark, setRemark ] = useState("")
 
-    const handleLogout = ()=>{
-        localStorage.removeItem('token')
-        navigate('/')
+    const handleLogout = async ()=>{
+        const res = await fetch(`${API}/api/user/logout`,{
+            method : 'POST',
+            credentials : 'include'
+        })
+
+        if (res.ok){
+            navigate('/')
+        }
     }
 
     const statusHandle = (status)=>{
@@ -34,13 +40,10 @@ function AdminManage(){
     }
 
     useEffect(()=>{
-        const token = localStorage.getItem('token')
         const handleRoleCheck = async ()=>{
             const res = await fetch(`${API}/api/user/role`,{
                 method : 'GET',
-                headers : {
-                    'Authorization' : `Bearer ${token}`
-                }
+                credentials : 'include'
             })
             const data = await res.json()
             if (!(res.ok && data.role == 'Admin')){
@@ -67,12 +70,9 @@ function AdminManage(){
     } 
 
     const RequestGrantedHandle = async(Id)=>{
-        const token = localStorage.getItem("token")
         const res = await fetch(`${API}/api/withdraw/${Id}/success`,{
             method : 'POST',
-            headers : {
-                'Authorization' : `Bearer ${token}`
-            }
+            credentials : 'include'
         })
         if(res.ok){
             window.location.reload()
@@ -84,11 +84,10 @@ function AdminManage(){
     }
 
     const RequestDeniedHandle = async(Id,remark)=>{
-        const token = localStorage.getItem("token")
         const res = await fetch(`${API}/api/withdraw/${Id}/reject`,{
             method : 'POST',
+            credentials : 'include',
             headers : {
-                'Authorization' : `Bearer ${token}`,
                 'content-type' : 'application/json'
             },
             body : JSON.stringify(remark)
@@ -106,12 +105,10 @@ function AdminManage(){
 
     useEffect(()=>{
         const handleRequest = async ()=>{
-            const token = localStorage.getItem("token")
+
             const res = await fetch(`${API}/api/withdraw/all`,{
                 method : 'GET',
-                headers : {
-                    'Authorization' : `Bearer ${token}`
-                }
+                credentials : 'include'
             })
             const data = await res.json()
             if(res.ok){

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { jwtDecode } from "jwt-decode"
 import { useNavigate } from "react-router-dom"
 
 function Musician(){
@@ -13,15 +12,9 @@ function Musician(){
     const [ donateStatus , setDonateStatus ] = useState()
 
     const handleDonationStatus = async()=>{
-        const token = localStorage.getItem('token')
-        if(!token){
-            navigate('/login')
-        }
         const res = await fetch(`${API}/api/user/donation/toggle`,{
             method : 'PUT',
-            headers : {
-                'Authorization' : `Bearer ${token}`
-            }
+            credentials : "include"
         })
         const data = await res.json()
         if (!res.ok){
@@ -33,14 +26,12 @@ function Musician(){
     }
 
     useEffect(()=>{
-        const token = localStorage.getItem('token')
+        
         const getConnectionStatus = async()=>{
             if (user){
                 const res = await fetch(`${API}/api/user/donation`,{
                     method : 'GET',
-                    headers : {
-                        'Authorization' : `Bearer ${token}`
-                    }
+                    credentials: "include"
                 })
                 const data = await res.json()
                 console.log(data)
@@ -51,38 +42,30 @@ function Musician(){
                 }
             }
         }
-        if(token){
-            getConnectionStatus()
-        }
+        getConnectionStatus()
     },[])
 
     useEffect(()=>{
-        const token = localStorage.getItem('token')
-        if (!token){
-            navigate('/login')
-        }else{
-            try{
-                const decode = jwtDecode(token)
-                console.log(decode)
-                setUser({
-                    Username : decode["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-                    UserId : decode["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
-                })
-            }catch{
-                console.log('error token missing')
+        const getUser = async ()=>{
+            const res = await fetch(`${API}/api/user/me`,{
+                credentials : 'include'
+            })
+            if(!res.ok){
+                navigate('/login')
             }
+            const data = await res.json()
+            console.log(data)
+            setUser({
+                Username : data.username,
+                UserId : data.userId
+            })
         }
-    },[])
+        getUser()
 
-    useEffect(()=>{
-        const token = localStorage.getItem('token')
-        if (!token) return;
         const handleRoleCheck = async ()=>{
             const res = await fetch(`${API}/api/user/role`,{
                 method : 'GET',
-                headers : {
-                    'Authorization' : `Bearer ${token}`
-                }
+                credentials : 'include'
             })
             const data = await res.json()
             if (res.ok && data.role == 'Admin'){
@@ -90,14 +73,18 @@ function Musician(){
             }
         } 
         handleRoleCheck()
-        
-    },[user])
+    },[])
 
-    
 
-    const handleLogout = ()=>{
-        localStorage.removeItem('token')
-        navigate('/')
+    const handleLogout = async()=>{
+        const res = await fetch(`${API}/api/user/logout`,{
+            method : 'POST',
+            credentials : "include"
+            }
+        )
+        if (res.ok){
+            navigate('/')
+        }
     }
 
     return(
