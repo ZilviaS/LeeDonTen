@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { jwtDecode } from "jwt-decode"
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { fetchEventSource } from '@microsoft/fetch-event-source';

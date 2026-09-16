@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
 import '../App'
-import { useNavigate } from 'react-router-dom'
 
 function Home(){
 
     const API = import.meta.env.VITE_API
     const [ serverStatus, setServerStatus ] = useState('offline')
-
-    const navigate = useNavigate()
 
     useEffect(()=>{
         const serverStatusHandler = async()=>{
