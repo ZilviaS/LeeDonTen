@@ -7,6 +7,7 @@ function Home(){
     const [ serverStatus, setServerStatus ] = useState('offline')
 
     useEffect(()=>{
+        //check server status
         const serverStatusHandler = async()=>{
             setServerStatus('pending')
             try{
@@ -39,7 +40,7 @@ function Home(){
                         <div className='w-full grid mb-2 gap-3 justify-center'>
                             <a href='/search' className='windows-button w-80 px-1 py-1 text-center W-95 bg-[#0000FF]  text-white'><span className='text-sm'>สำหรับผู้ใช้ทั่วไป</span> (Audience)</a>
                             {/* <a href='/search' className='roboto-mono w-80 bg-blue-500 hover:bg-blue-700 text-center px-2 py-1 rounded text-white hover:cursor-pointer'>สำหรับผู้ใช้ทั่วไป (Audience)</a> */}
-                            <a href='/musician' className='windows-button w-80 px-1 py-1 text-center W-95 bg-[#FF00FF] text-white'><span className='text-sm'>สำหรับนักดนตรี</span> (Musician)</a>
+                            <a href='/user' className='windows-button w-80 px-1 py-1 text-center W-95 bg-[#FF00FF] text-white'><span className='text-sm'>สำหรับนักดนตรี</span> (Musician)</a>
                             {/* <a href='/musician' className='roboto-mono w-80 bg-pink-500 text-center hover:bg-pink-700 px-2 py-1 rounded text-white hover:cursor-pointer'>สำหรับนักดนตรี (Musician)</a> */}
                         </div>
                         <div className='w-full flex justify-center gap-3 mb-3'>

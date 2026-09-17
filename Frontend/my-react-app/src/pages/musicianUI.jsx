@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
+//musician donation page
 function MusicianUi(){
 
     const navigate = useNavigate()
@@ -24,13 +25,11 @@ function MusicianUi(){
 
     const [ onlineToggle, setOnlineToggle ] = useState(false)
 
+    //get user's donation status
     const handleDonationStatus = async()=>{
-        const token = localStorage.getItem('token')
         const res = await fetch(`${API}/api/user/donation/toggle`,{
             method : 'PUT',
-            headers : {
-                'Authorization' : `Bearer ${token}`
-            }
+            credentials : 'include'
         })
         const data = await res.json()
         if (!res.ok){
@@ -41,11 +40,14 @@ function MusicianUi(){
         
     }
 
+    //add request to queue 
     const handleAddQueue = (item)=>{
         setQueue(prev => [...prev, item])
 
         setDonations(prev => prev.filter(d=> d.id !== item.id))
     }
+
+    //add queue to play
 
     const handlePlayRequest = async (item)=>{
         const res = await fetch(`${API}/api/donate/update/${item.id}/play`,{
@@ -62,6 +64,7 @@ function MusicianUi(){
         }
     }
 
+    //cancel request
     const handleCancelRequest = async (item)=>{
         const res = await fetch(`${API}/api/donate/update/${item.id}/cancel`,{
             method : 'PUT'
@@ -77,6 +80,7 @@ function MusicianUi(){
     }
 
     useEffect(()=>{
+        //check user
         const handleUser = async ()=>{
             const res = await fetch(`${API}/api/user/me`,{
                 credentials : "include"
@@ -94,6 +98,8 @@ function MusicianUi(){
             })
 
         }
+
+        //get user's donation status
         const getConnectionStatus = async()=>{
             const res = await fetch(`${API}/api/user/donation`,{
                 method : 'GET',
@@ -111,6 +117,7 @@ function MusicianUi(){
         getConnectionStatus()
     },[])
 
+    //SSE operation
     useEffect(()=>{
         const controller = new AbortController()
 
@@ -174,7 +181,7 @@ function MusicianUi(){
                             </div>
                         </div>
                         <div className='flex justify-center py-3'>
-                            <p className='KoHo font-semibold text-xl'>หน้าต่าง Donate (นักดนตรี)</p>
+                            <p className='KoHo font-semibold text-xl'>หน้าต่าง Donate ({user.Username})</p>
                         </div>
                         <div className="w-full flex justify-between px-10 pb-1 items-baseline">
                             <div className="flex items-center gap-1 mx-1">

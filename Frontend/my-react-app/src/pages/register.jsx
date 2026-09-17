@@ -40,7 +40,7 @@ function Register(){
         if(res.ok){
             console.log(resData.token)
             localStorage.setItem("token",resData.token)
-            navigate('/musician')
+            navigate('/user')
         }
     }
 

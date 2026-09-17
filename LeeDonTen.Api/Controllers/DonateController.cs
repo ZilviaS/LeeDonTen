@@ -228,7 +228,7 @@ public class DonateController : ControllerBase
         }
 
         var data = context.Requests
-            .Where(data=> data.UserId == userId)
+            .Where(data=> data.UserId == userId && data.Status != 0)
             .ToList();
         
         logger.LogInformation("User {userId} requested donation information", userId);

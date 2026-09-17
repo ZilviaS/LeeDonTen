@@ -15,6 +15,7 @@ function AdminManage(){
     const [ selectedRequestId, setSelectedRequestId ] = useState(null);
     const [ remark, setRemark ] = useState("")
 
+    // Logout
     const handleLogout = async ()=>{
         const res = await fetch(`${API}/api/user/logout`,{
             method : 'POST',
@@ -26,6 +27,7 @@ function AdminManage(){
         }
     }
 
+    // for status information in table
     const statusHandle = (status)=>{
         switch (status){
             case 0:
@@ -40,6 +42,7 @@ function AdminManage(){
     }
 
     useEffect(()=>{
+        // checking the role if admin
         const handleRoleCheck = async ()=>{
             const res = await fetch(`${API}/api/user/role`,{
                 method : 'GET',
@@ -54,6 +57,7 @@ function AdminManage(){
         
     },[])
 
+    // for payment type information in table
     const paymentStatusHandle = (status)=>{
         switch (status){
             case 0:
@@ -69,6 +73,7 @@ function AdminManage(){
         }
     } 
 
+    // for granted withdraw request
     const RequestGrantedHandle = async(Id)=>{
         const res = await fetch(`${API}/api/withdraw/${Id}/success`,{
             method : 'POST',
@@ -83,6 +88,7 @@ function AdminManage(){
         }
     }
 
+    // for Denied withdraw request
     const RequestDeniedHandle = async(Id,remark)=>{
         const res = await fetch(`${API}/api/withdraw/${Id}/reject`,{
             method : 'POST',
@@ -102,6 +108,8 @@ function AdminManage(){
         }
 
     }
+
+    //request the withdraw information from Backend
 
     useEffect(()=>{
         const handleRequest = async ()=>{

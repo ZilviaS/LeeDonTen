@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+//musician's menu
 function Musician(){
 
     const API = import.meta.env.VITE_API
@@ -11,6 +12,9 @@ function Musician(){
     })
     const [ donateStatus , setDonateStatus ] = useState()
 
+    const [ cookieChecking , setCookieChecking] = useState(true)
+
+    //handle user's donation status
     const handleDonationStatus = async()=>{
         const res = await fetch(`${API}/api/user/donation/toggle`,{
             method : 'PUT',
@@ -26,7 +30,7 @@ function Musician(){
     }
 
     useEffect(()=>{
-        
+        // get current user's donation status
         const getConnectionStatus = async()=>{
             if (user){
                 const res = await fetch(`${API}/api/user/donation`,{
@@ -46,6 +50,7 @@ function Musician(){
     },[])
 
     useEffect(()=>{
+        // get user's information
         const getUser = async ()=>{
             const res = await fetch(`${API}/api/user/me`,{
                 credentials : 'include'
@@ -55,7 +60,9 @@ function Musician(){
                 return;
             }
             const data = await res.json()
-            console.log(data)
+            if(data){
+                setCookieChecking(false)
+            }
             setUser({
                 Username : data.username,
                 UserId : data.userId
@@ -63,6 +70,7 @@ function Musician(){
         }
         getUser()
 
+        //get user's role
         const handleRoleCheck = async ()=>{
             const res = await fetch(`${API}/api/user/role`,{
                 method : 'GET',
@@ -76,7 +84,7 @@ function Musician(){
         handleRoleCheck()
     },[])
 
-
+    //logout
     const handleLogout = async()=>{
         const res = await fetch(`${API}/api/user/logout`,{
             method : 'POST',
@@ -93,7 +101,7 @@ function Musician(){
             <section className='flex w-full justify-center pt-5  bg-[#017C7E]'>
                 <section className='md:w-[70%] w-[90%] min-h-screen rounded'>
                 
-                    {user?  <>
+                    {!cookieChecking?  <>
                         <div className='h-[80%] windows flex flex-col bg-white rounded-b'>
                             <div className='flex w-full justify-between bg-[#00007D] px-2'>
                                 <div>
@@ -122,10 +130,10 @@ function Musician(){
                                     <p className="w-full text-center KoHo text-3xl font-semibold">หน้าต่างใช้งาน</p>
                                     <div className="flex justify-center w-full mt-5">
                                         <div className="grid gap-3">
-                                            <a href="/musician/donation" className="text-center windows-button W-95 bg-[#018281]  hover:cursor-pointer  px-3 py-2 text-white">หน้าต่าง Donate</a>
+                                            <a href="/user/donation" className="text-center windows-button W-95 bg-[#018281]  hover:cursor-pointer  px-3 py-2 text-white">หน้าต่าง Donate</a>
                                             <a href={`/user/${user.Username}/account`} className="text-center windows-button W-95 bg-red-500 hover:cursor-pointer px-3 py-2 text-white ">จัดการบัญชี</a>
                                             <a href={`/user/${user.Username}/history`} className="text-center windows-button W-95 bg-yellow-500 hover:cursor-pointer  px-3 py-2 text-white">ประวัติการ Donate</a>
-                                            <a href={`/musician/tutorial`} className="text-center bg-blue-500 windows-button W-95  hover:cursor-pointer px-3 py-2 text-white" >วิธีการใช้งาน LeeDonTen</a>
+                                            <a href={`/user/tutorial`} className="text-center bg-blue-500 windows-button W-95  hover:cursor-pointer px-3 py-2 text-white" >วิธีการใช้งาน LeeDonTen</a>
                                         </div>
                                     </div>
                                 </div>
@@ -136,15 +144,16 @@ function Musician(){
                             
                         </div>
                     </> : <>
-                        <div className='h-[80%] bg-white flex-col flex items-center justify-center'>
-                            <div className='flex justify-center pb-5'>
-                                <p className='KoHo font-semibold text-2xl'>มีบัญชีผู้ใช้รึยัง?</p>
+                        <div className='h-[80%] windows flex flex-col bg-white rounded-b'>
+                            <div className='flex w-full justify-between bg-[#00007D] px-2'>
+                                <div>
+                                    <a className="W-95 text-md py-1 text-white" href="/">LeeDonTen</a>
+                                </div>
                             </div>
-                            <div className="w-full flex justify-center gap-3 items-center pb-5">
-                                <a href="/login" className='roboto-mono bg-blue-500 hover:bg-blue-700 text-center px-5 py-1 rounded text-white hover:cursor-pointer'>เข้าสู่ระบบ</a>
-                                <p className="KoHo">หรือ</p>
-                                <a href="/register" className='roboto-mono bg-pink-500 text-center hover:bg-pink-700 px-5 py-1 rounded text-white hover:cursor-pointer'>สมัครสมาชิก</a>
+                            <div className="flex flex-col justify-between h-full gap-10 p-2">
+                                <div className="W-95">please, wait...</div>
                             </div>
+                            
                         </div>
                     </>}
 

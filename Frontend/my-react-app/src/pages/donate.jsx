@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import QRCode from "react-qr-code";
 import wrong from "../assets/wrong.png"
 import exclamation from "../assets/exclamation.png"
-
+//for guest donate
 function Donate(){
 
     const API = import.meta.env.VITE_API
@@ -26,6 +26,7 @@ function Donate(){
 
     const [ paymentReference, setPaymentReference ] = useState('')
 
+    //for handle Donation
     const handleDonate = async()=>{
         if(request.UserId == null){
             setErrorLog("something went wrong")
@@ -50,6 +51,7 @@ function Donate(){
         }
     }
 
+    //for user checking
     useEffect(()=>{
         const handleUserId = async()=>{
             const res = await fetch(`${API}/api/user/${Username}/id`)
@@ -66,6 +68,7 @@ function Donate(){
         handleUserId()
     },[])
 
+    // update page state && sync with musician's SSE
     useEffect(()=>{
         if (pageState !== "pending") return;
 

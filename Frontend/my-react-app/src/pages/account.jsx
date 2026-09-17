@@ -75,6 +75,8 @@ function Account(){
     }
 
     useEffect(()=>{
+
+        //getUserInfo
         const getUser = async ()=>{
             const res = await fetch(`${API}/api/user/me`,{
                 credentials : 'include'
@@ -87,6 +89,7 @@ function Account(){
         }
         getUser()
 
+        //get Balance from user's account
         const handleAmount = async()=>{
             const res = await fetch(`${API}/api/user/balance`,{
                 credentials : "include"})
@@ -97,6 +100,8 @@ function Account(){
                 setBalance(data.total)
             }
         }
+
+        //get user's withdraw infomation
         const handleWithdrawInfo = async()=>{
             const res = await fetch(`${API}/api/withdraw/user`,{
                 credentials : "include"

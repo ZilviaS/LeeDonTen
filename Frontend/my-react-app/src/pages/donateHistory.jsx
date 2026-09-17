@@ -14,7 +14,7 @@ import {
 import { Cell } from "recharts";
 import arrowheadIcon from '../assets/arrowhead.svg'
 import downloadIcon from '../assets/download-minimalistic-svgrepo-com.svg'
-
+//for user's donation history
 function DonateHistory(){
 
     const API = import.meta.env.VITE_API
@@ -29,6 +29,7 @@ function DonateHistory(){
 
     const [ donateInfo, setDonateInfo ] = useState([])
 
+    //for date format translation
     const dateFormatHandle = (data)=>{
         const date = new Date(data)
         const formatted = date.toLocaleString("th-TH", {
@@ -41,6 +42,7 @@ function DonateHistory(){
         return formatted
     }
 
+    //for payment status information
     const handleStatusCheck = (status)=>{
         if (status == 0){
             return 'pending'
@@ -60,6 +62,7 @@ function DonateHistory(){
     const [ sortBy, setSortBy ] = useState('date')
     const [sortOrder, setSortOrder] = useState("desc");
 
+    //for searching with keywords
     const searchedList = donateInfo.filter((info)=>{
         const keyword = searchTerm.toLowerCase()
 
@@ -75,7 +78,7 @@ function DonateHistory(){
         const passUnpaidFilter = unpaidBlind || info.statusText !== 'unpaid'
 
         return matchSearch && passUnpaidFilter
-    }).sort((a,b) => {
+    }).sort((a,b) => { //for  sorting
         if (sortBy == 'date'){
             return sortOrder === "desc"
                 ? new Date(b.createdAt) - new Date(a.createdAt)
@@ -92,6 +95,7 @@ function DonateHistory(){
     }
     )
 
+    //for linechart
     const dailyData = Object.values(
         donateInfo.filter(item => item.status != 2).reduce((acc, item)=>{
             const date = item.createdAt.split("T")[0]
@@ -108,6 +112,7 @@ function DonateHistory(){
         }, {})
     )
 
+    //for in chart donor colour
     const donorDataChartsColor = [
         "#ec4899",
         "#8b5cf6",
@@ -115,6 +120,8 @@ function DonateHistory(){
         "#10b981",
         "#f59e0b"
     ]
+
+    //for bar chart
     const donorData = Object.values(
         donateInfo.filter(item => item.status != 2).reduce((acc, item)=>{
             if (!acc[item.donorName]) {
@@ -177,6 +184,7 @@ function DonateHistory(){
     }
 
     useEffect(()=>{
+        //check user
         const userCheck = async ()=>{
             const res = await fetch(`${API}/api/user/me`,{
                 credentials : "include"
@@ -194,6 +202,7 @@ function DonateHistory(){
         }
         userCheck()
 
+        //get donation info
         const handleDonationSetup = async()=>{
             const res = await fetch(`${API}/api/donate/info`,{
                 credentials : "include"})
