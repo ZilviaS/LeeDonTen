@@ -30,7 +30,7 @@ function Login(){
 
         if (res.ok){
             console.log('its ok')
-            navigate('/musician')
+            navigate('/user')
         }else{
             const resData = await res.json()
             console.log(resData)

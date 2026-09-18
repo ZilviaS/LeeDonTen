@@ -26,7 +26,6 @@ public class DonateController : ControllerBase
     private readonly HttpClient _httpClient;
     private readonly IConfiguration configuration;
     private readonly ILogger<DonateController> logger;
-
     public DonateController(AppDbContext context, UserManager<User> userManager, IHttpClientFactory factory, IConfiguration configuration, ILogger<DonateController> logger)
     {
         this.context = context;
@@ -36,6 +35,7 @@ public class DonateController : ControllerBase
         this.logger = logger;
     }
 
+    // post the donation (save as pending)
     [HttpPost]
     public async Task<IActionResult> Donate(DonateDto dto)
     {
@@ -131,6 +131,8 @@ public class DonateController : ControllerBase
                 message = "Internal Server Error"});
         }
     }
+    
+    // get the donation status
     [HttpGet("status/{reference}")]
     public async Task<IActionResult> GetStatus(string reference)
     {
@@ -151,6 +153,7 @@ public class DonateController : ControllerBase
         });
     }
 
+    // cancel the donation
     [HttpPut("update/{requestId}/cancel")]
     public IActionResult CancelRequest(int requestId)
     {
@@ -183,6 +186,7 @@ public class DonateController : ControllerBase
         });
     }
 
+    // play the song request
     [HttpPut("update/{requestId}/play")]
     public IActionResult PlayRequest(int requestId)
     {
@@ -215,6 +219,7 @@ public class DonateController : ControllerBase
         });
     } 
 
+    //get the donation info
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("info")]
     public IActionResult GetDonateInfo()

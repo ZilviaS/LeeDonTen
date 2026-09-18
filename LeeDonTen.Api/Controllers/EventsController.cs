@@ -19,6 +19,7 @@ public class EventsController : ControllerBase
         this.sseService = sseService;
     }
 
+    
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet]
     public async Task Get()

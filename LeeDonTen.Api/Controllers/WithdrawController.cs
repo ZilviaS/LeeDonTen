@@ -26,6 +26,7 @@ public class WithdrawController : ControllerBase
         this.logger = logger;
     }
 
+    // get user's withdraw info
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("user")]
     public IActionResult GetWithdrawInfo()
@@ -44,6 +45,7 @@ public class WithdrawController : ControllerBase
         return Ok(withdraw); 
     }
 
+    // post the user's withdraw request
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost]
     public async Task<IActionResult> RequestWithdraw(WithdrawRequestDto dto) 
@@ -125,6 +127,7 @@ public class WithdrawController : ControllerBase
         
     }
 
+    // get all withdraw request (admin)
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [HttpGet("All")]
     public async Task<IActionResult> AllWithdrawRequest()
@@ -143,6 +146,7 @@ public class WithdrawController : ControllerBase
         }));
     }
 
+    // granted the withdraw request (admin)
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [HttpPost("{Id}/success")]
     public async Task<IActionResult> RequestGranted(int Id)
@@ -192,6 +196,7 @@ public class WithdrawController : ControllerBase
         }
     }
 
+    // rejected the withdraw request (admin)
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [HttpPost("{Id}/reject")]
     public async Task<IActionResult> RequestDenied(int Id, DeniedRequestDTO dto )

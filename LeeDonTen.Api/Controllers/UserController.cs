@@ -31,6 +31,7 @@ public class UserController : ControllerBase
         this.logger = logger;
     }
 
+    //register the user
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterDto dto)
     {
@@ -89,6 +90,7 @@ public class UserController : ControllerBase
         });
     }
 
+    // user login
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserLoginDto dto)
     {
@@ -133,6 +135,7 @@ public class UserController : ControllerBase
         return Ok();
     }
 
+    // user logout
     [HttpPost("logout")]
     public IActionResult Logout()
     {
@@ -146,6 +149,7 @@ public class UserController : ControllerBase
         return Ok(new {message = "Logout Successful"});
     }
 
+    // check cookies
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("me")]
     public IActionResult Me()
@@ -157,6 +161,7 @@ public class UserController : ControllerBase
         });
     }
 
+    // check if user open donation
     [HttpGet("check/{username}")]
     public IActionResult CheckUserDonation(string username)
     {
@@ -184,6 +189,7 @@ public class UserController : ControllerBase
         });
     }
 
+    // get User Id
     [HttpGet("{username}/id")]
     public IActionResult GetId(string username)
     {
@@ -203,6 +209,7 @@ public class UserController : ControllerBase
         });
     }
 
+    // toggle the user donation
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPut("donation/toggle")]
     public async Task<IActionResult> ToggleDonation()
@@ -251,6 +258,7 @@ public class UserController : ControllerBase
         
     }
 
+    // get the user open-donation status
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("donation")]
     public async Task<IActionResult> GetDonationStatus()
@@ -287,6 +295,7 @@ public class UserController : ControllerBase
         }
     }
 
+    // get user total balance in the account
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("balance")]
     public async Task<IActionResult> GetUserAmount()
@@ -325,6 +334,7 @@ public class UserController : ControllerBase
         
     }
 
+    // get user role
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("role")]
     public async Task<IActionResult> GetUserRole()
